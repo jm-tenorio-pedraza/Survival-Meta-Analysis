@@ -1,41 +1,41 @@
 # Define extensions of .csv files containing the survival curves from preclinical expts.
 
-setwd("~/Documents/Data/CSV")
+setwd("~/Documents/Data/CSV/Survival/Datasets")
+study <- sub('./','', list.dirs()[-1])
+temp <- (lapply(list.dirs()[-1], function(x) list.files(path = x, pattern = '*.csv')))
 
-fileExt<-c('Allard_2013/Allard_2013_Fig3.csv',
-           'Duraiswamy_2013/Duraiswamy_2013_Fig3i.csv',
-           'Duraiswamy_2013/Duraiswamy_2013_Fig5i.csv',
-           'Duraiswamy_2013/Duraiswamy_2013_Fig5ii.csv',
-           'Duraiswamy_2013/Duraiswamy_2013_Fig5iii.csv',
-           'Duraiswamy_2013/Duraiswamy_2013_Fig5iv.csv',
-           'Lu_2014/Lu_2014_Fig1c.csv',
-           'Lu_2014/Lu_2014_Fig5b.csv',
-           'Lu_2014/Lu_2014_Fig5d.csv',
-           'Yu_2010/Yu_2010_Fig6.csv')
-fileExt <- (paste(getwd(), fileExt, sep='/'))
-study <- c('ALLARD_2013', 'DURAISWAMY_2013','DURAISWAMY_2013', 'DURAISWAMY_2013',
-           'DURAISWAMY_2013', 'DURAISWAMY_2013', 'LU_2014','LU_2014','LU_2014', 'YU_2010')
+figures <- sub('(.*)_Fig', '', unlist(temp))
+figures <- sub('(.*)_SF', 'SF',figures) 
+figures <- sub('.csv', '', figures)
+studies <- sub('_Fig(.*)', '', unlist(temp))
+studies <- sub('_SF(.*)', '', studies)
+
+fileExt <- paste(getwd(), studies, unlist(temp), sep = '/')
 datasets <- lapply(fileExt, read.csv)
-N_mice <- list(c(15, 15, 15, 15, 15,15),
-          c(12, 12, 12, 12),
-          c(12, 12, 12, 12, 12, 12, 12, 12),
-          c(12, 12, 12, 12),
-          c(12, 12, 12, 12),
-          c(12, 12),
-          c(10, 10, 10, 10),
-          c(10, 10, 10, 10),
-          c(10, 10, 10, 10, 10, 10),
-          c(6, 6, 6, 6, 6, 6, 6))
-finalT <- list(80,
-               120,
-               120,
-               120,
-               120,
-               120,
-               90,
-               90,
-               90,
-               100)
+experiments <- lapply(datasets, function(x) names(x)[seq(1, length(names(x)), 2)])
+
+n_studies <- unlist(lapply(experiments, length))
+studies.factor <- rep(studies, n_studies)
+figures.factor <- rep(figures, n_studies)
+experiments.factor <- data.frame((studies.factor), figures.factor, (unlist(experiments)))
+names(experiments.factor) <- c('STUDY_ID', 'FIG', 'EXPERIMENT')
+head(experiments.factor)
+
+Survival_Data <- read.csv2("~/Documents/Data/CSV/Survival/Survival_Data.csv")
+
+EXPERIMENT <- paste(Survival_Data$TREATMENT_1, 
+                                  Survival_Data$TREATMENT_2, 
+                                  Survival_Data$TREATMENT_3,
+                                  Survival_Data$CELL,sep='_')
+EXPERIMENT <- sub('__', '_', EXPERIMENT) # apply twice
+EXPERIMENT <- sub('__', '_', EXPERIMENT) # apply twice
+
+Survival_Data$EXPERIMENT <- EXPERIMENT
+head(Survival_Data)
+survival.subset <-match_df(Survival_Data, experiments.factor, on = c('STUDY_ID', 'FIG', 'EXPERIMENT'))
+differences <- data.frame(setdiff(experiments.factor$EXPERIMENT, survival.subset$EXPERIMENT))
+setdiff(experiments.factor$STUDY_ID, survival.subset$STUDY_ID)
+setdiff(survival.subset$EXPERIMENT, experiments.factor$EXPERIMENT)
 dataSurvival <- list()
 for(i in 1:length(datasets)){
   dataSurvival[[i]] = processSurvivalData(datasets[[i]], N_mice[[i]], finalT[[i]])
