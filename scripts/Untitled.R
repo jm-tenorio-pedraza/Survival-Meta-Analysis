@@ -47,7 +47,7 @@ processSurvivalData <- function(df,N, Time){
     survivors = round(S_t_i*N_i)
     deaths = c(0 ,diff(survivors)*(-1))
     atRisk = survivors+deaths
-    censored_i = time_i==Time
+    censored_i = time_i==Time[i]
     survival[indx:(indx+length(time_i)-1),1] = time_i
     survival[indx:(indx+length(time_i)-1),2] = S_t_i
     survival[indx:(indx+length(time_i)-1),3] = atRisk
@@ -67,18 +67,59 @@ processSurvivalData <- function(df,N, Time){
   survival$Experiment <- ordered(survival$Experiment, experiment_levels_ordered,experiment_levels_ordered)
   return(survival)
 }
+
+plotSurvival <- function(df){
+  cell<-ggplot(df,aes(y=(Survival),x=Time,colour=Experiment)) +
+    geom_point() +
+    geom_step(data=df,aes(y=(Survival),x=Time))+ 
+    theme(axis.text.x = element_text(angle = 45))
+  
+  cell+labs(color='Treatment ',  y='Survival',
+            title='Survival in preclinical experiments',
+            subtitle='Effect of treatment')
+  
+}
 expandSurvivalFunction <- function(surv.df){
-  Time <- rep(surv.df$Time, surv.df$Deaths)
-  Event <- rep(!surv.df$Censored, surv.df$Deaths)
-  Experiment <- rep(surv.df$Experiment, surv.df$Deaths)
-  Cell <-rep(surv.df$Cell, surv.df$Deaths)
-  Treatment_1 <- rep(surv.df$Treatment_1, surv.df$Deaths)
-  Treatment_2 <- rep(surv.df$Treatment_2, surv.df$Deaths)
-  Treatment_3 <- rep(surv.df$Treatment_3, surv.df$Deaths)
-  N_mice <- rep(surv.df$N_mice, surv.df$Deaths)
+  Time <- rep(surv.df$Time, surv.df$Deaths+surv.df$Censored)
+  Event <- rep(!surv.df$Censored, surv.df$Deaths+surv.df$Censored)
+  Experiment <- rep(surv.df$Experiment, surv.df$Deaths+surv.df$Censored)
+  Cell <-rep(surv.df$Cell, surv.df$Deaths+surv.df$Censored)
+  Treatment_1 <- rep(surv.df$Treatment_1, surv.df$Deaths+surv.df$Censored)
+  Treatment_2 <- rep(surv.df$Treatment_2, surv.df$Deaths+surv.df$Censored)
+  Treatment_3 <- rep(surv.df$Treatment_3, surv.df$Deaths+surv.df$Censored)
+  N_mice <- rep(surv.df$N_mice, surv.df$Deaths+surv.df$Censored)
   survival <- data.frame(Time, Event,N_mice, Experiment,Cell, Treatment_1, Treatment_2, Treatment_3)
   return(survival)
 }
+
+SurvMedians <- function(df){
+  med_hat <- log(2)*sum(df$Time)/sum(df$Event)
+  var_Bartholomew <- med_hat^2/sum(1-exp(-df$Time*log(2)/med_hat))
+  CI_LB_Barth <- med_hat-1.96*sqrt(var_Bartholomew)
+  CI_UB_Barth <-med_hat + 1.96*sqrt(var_Bartholomew)
+  d_Tot <- sum(df$Event)
+  lambda_hat <- sum(df$Event)/sum(df$Time)
+  CI_LB_VarEst <- log(2)/exp(log(lambda_hat)+d_Tot^(-1/2)*1.96)
+  CI_UB_VarEst <- log(2)/exp(log(lambda_hat)-d_Tot^(-1/2)*1.96)
+  medians.df <-data.frame(Median = med_hat,
+                          CI_LB_Barth, CI_UB_Barth, CI_LB_VarEst, CI_UB_VarEst)
+  return(medians.df)
+}
+createDF <- function(medians.list,df, publication_name){
+  indx <- match( names(medians.list), df$Experiment)
+  data.frame(Study=rep(publication_name, length(names(medians.list))),
+            Treatment = names(medians.list),
+             Median=unlist(lapply(medians.list, function(x) x[c(1)])),
+             LB=unlist(lapply(medians.list, function(x) x[c(4)])),
+             UB=unlist(lapply(medians.list, function(x) x[c(5)])), row.names = c(),
+             Cell=df$Cell[indx],
+            N_mice = df$N_mice[indx],
+             Treatment_1 = df$Treatment_1[indx],
+             Treatment_2 = df$Treatment_2[indx],
+             Treatment_3 = df$Treatment_3[indx]
+             )
+}
+
 phi.u <- function(m,n,X,Y,psi){
   phi_tilde<-m*n/(m+n)^2*(psi*(n-X)*Y/n*(1+(psi-1)*Y/m)+X*(m-Y)/m*(psi-(psi-1)*X/n))
   return(phi_tilde)
@@ -131,44 +172,6 @@ MH.Estimate <- function(df){
     betaMH$CI_UB[i] <- betaUB
   }
   return(betaMH)
-}
-SurvMedians <- function(df){
-  med_hat <- log(2)*sum(df$Time)/sum(df$Event)
-  var_Bartholomew <- med_hat^2/sum(1-exp(-df$Time*log(2)/med_hat))
-  CI_LB_Barth <- med_hat-1.96*sqrt(var_Bartholomew)
-  CI_UB_Barth <-med_hat + 1.96*sqrt(var_Bartholomew)
-  d_Tot <- sum(df$Event)
-  lambda_hat <- sum(df$Event)/sum(df$Time)
-  CI_LB_VarEst <- log(2)/exp(log(lambda_hat)+d_Tot^(-1/2)*1.96)
-  CI_UB_VarEst <- log(2)/exp(log(lambda_hat)-d_Tot^(-1/2)*1.96)
-  medians.df <-data.frame(Median = med_hat,
-                          CI_LB_Barth, CI_UB_Barth, CI_LB_VarEst, CI_UB_VarEst)
-  return(medians.df)
-}
-createDF <- function(medians.list,df, publication_name){
-  indx <- match( names(medians.list),df$Experiment)
-  data.frame(Study=rep(publication_name, length(names(medians.list))),
-            Treatment = names(medians.list),
-             Median=unlist(lapply(medians.list, function(x) x[c(1)])),
-             LB=unlist(lapply(medians.list, function(x) x[c(4)])),
-             UB=unlist(lapply(medians.list, function(x) x[c(5)])), row.names = c(),
-             Cell=df$Cell[indx],
-            N_mice = df$N_mice[indx],
-             Treatment_1 = df$Treatment_1[indx],
-             Treatment_2 = df$Treatment_2[indx],
-             Treatment_3 = df$Treatment_3[indx]
-             )
-}
-plotSurvival <- function(df){
-  cell<-ggplot(df,aes(y=(Survival),x=Time,colour=Experiment)) +
-    geom_point() +
-    geom_step(data=df,aes(y=(Survival),x=Time))+ 
-    theme(axis.text.x = element_text(angle = 45))
-  
-  cell+labs(color='Treatment ',  y='Survival',
-            title='Survival in preclinical experiments',
-            subtitle='Effect of treatment')
-  
 }
 # Load data
 Allard2013_Fig3 <- read.csv("~/Documents/Data/CSV/Allard_2013/Allard_2013_Fig3.csv")
