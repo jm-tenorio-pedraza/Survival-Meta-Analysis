@@ -1,0 +1,132 @@
+﻿CELL;CELL_FAMILY;PARENTAL_CELL_LINE;CITATION_CELL_LINE;CITATION_PARENTAL;CANCER_ORIGIN;CANCER_TYPE
+769;769;769;76-9;76-9;Rhabdomyosarcoma;RMS
+A20;A20;A20;A20;A20;B-cell lymphoma;BCL
+A20luc;A20;A20;A20;A20;B-cell lymphoma;BCL
+NS0;NS0;P3NS11AG41;NS0;P3/NS1/1-Ag4.1;B-cell lymphoma;BCL
+MB49;MB49;MB49;MB49;MB49;Bladder transitional carcinoma;MUC
+MMTVPyMT;MMTVPyMT;MMTVPyMT;MMTVPyMT;MMTVPyMT;Breast cancer;TNBC
+NDL;NDL;NDL;NDL;NDL;Breast cancer;TNBC
+NT25;NT25;NT25;NT2.5;NT2.5;Breast cancer;TNBC
+TUBO;TUBO;TUBO;TUBO;TUBO;Breast cancer;TNBC
+MycCap;MycCap;MycCap;Myc-CaP;Myc-CaP;Carcinoma of the prostate gland;MCRPC
+Colon26;Colon26;Colon26;MC-26;MC-26;Colon adenocarcinoma;MCC
+CT26;CT26;CT26;CT26;CT26;Colon adenocarcinoma;MCC
+CT26HER2;CT26HER2;CT26;CT26;CT26;Colon adenocarcinoma;MCC
+CT26PDL1;CT26PDL1;CT26;CT26;CT26;Colon adenocarcinoma;MCC
+5T33;5T33;5T33;5T33MMvt;5T33MMvt;Plasma cell myeloma;MM
+5T33GFP;5T33;5T33;5T33MMvt;5T33MMvt;Plasma cell myeloma;MM
+MC38;MC38;MC38;MC38;MC38;Colon adenocarcinoma;MCC
+MC38CEA;MC38CEA;MC38;MC38-CEA;MC38;Colon adenocarcinoma;MCC
+MC38luc;MC38;MC38;MC38-luc;MC38;Colon adenocarcinoma;MCC
+MC38OVA;MC38OVA;MC38;MC38-OVA;MC38;Colon adenocarcinoma;MCC
+MC38PD1KO;MC38PD1KO;MC38;MC38-PD1KO;MC38;Colon adenocarcinoma;MCC
+MC38PDL1;MC38PDL1;MC38;MC38-PDL1;MC38;Colon adenocarcinoma;MCC
+MC38PDL1KO;MC38PDL1KO;MC38;MC38-PDL1KO;MC38;Colon adenocarcinoma;MCC
+4NQOPESCC;4NQOPESCC;4NQOPESCC;4NQOPESCC;4NQOPESCC;Esophageal squamous cancer;GC/GEJC
+005GSC;005GSC;005 GSCs;005 GSCs;005 GSCs;Glioblastoma;GBM
+CT2A;CT2A;CT2A;CT-2A;CT-2A;Glioblastoma;GBM
+GL261;GL261;GL261;GL261;GL261;Glioblastoma;GBM
+GL2615;GL2615;GL261;GL261;GL261;Glioblastoma;GBM
+GL261ffluc-mCherry;GL261;GL261;GL261;GL261;Glioblastoma;GBM
+GL261luc;GL261;GL261;GL261;GL261;Glioblastoma;GBM
+GL26cit;GL26cit;GL261;GL261;GL261;Glioblastoma;GBM
+MS7080;MS7080;MS7080;MS7080;MS7080;Glioblastoma;GBM
+SB28;SB28;SB28;SB28;SB28;Glioblastoma;GBM
+SB28GFP;SB28;SB28;SB28-GFP;SB28;Glioblastoma;GBM
+SMA560;SMA560;SMA560;SMA-560;SMA-560;Glioblastoma;GBM
+105K;105K;105K;105K;105K;Hepatocellular carcinoma;HCC
+cmycOVAHC;cmycOVAHC;NA;cmyc-OVA;NA;Hepatocellular carcinoma;HCC
+H22;H22;H22;H22;H22;Hepatocellular carcinoma;HCC
+BCRABL;BCRABL;Cdkn2aBM;BCR-ABL;Cdkn2aBM;Leukemia;AML
+C1498;C1498;C1498;C1498;C1498;Leukemia;AML
+HCa1;HCa1;HCa1;HCA-1;HCA-1;Hepatocellular carcinoma;HCC
+Hepa16;Hepa16;Hepa1;Hepa-16;Hepa-1;Hepatocellular carcinoma;HCC
+TMKOC;TMKOC;TMKOC;TMKOC;TMKOC;Hepatocellular carcinoma;HCC
+TMKOCaddback;TMKOCaddback;TMKOC;TMKOC-addback;TMKOC;Hepatocellular carcinoma;HCC
+344SQluc;344SQ;344SQ;344SQ;344SQ;Lung cancer;NSCLC
+344SQR;344SQR;344SQ;344SQ;344SQ;Lung cancer;NSCLC
+HKP1;HKP1;HKP1;HKP1;HKP1;Lung cancer;NSCLC
+Line1M;Line1M;Line1;Line-1M;Line 1;Lung cancer metastasis;NSCLC
+3LL;3LL;3LL;3LL;3LL;Lung carcinoma;NSCLC
+4T1;4T1;4102;4T1;410.2;Mammary carcinoma;TNBC
+4T12;4T12;4T1;4T1.2;4T1;Mammary carcinoma;TNBC
+4T1fLuc;4T1;4T1;4T1;4T1-fLuc;Mammary carcinoma;TNBC
+4T1luc;4T1;4T1;4T1-luc;4T1;Mammary carcinoma;TNBC
+AT3OVA;AT3OVA;AT3;AT3-OVA;AT3;Mammary carcinoma;TNBC
+AT3OVACD73;AT3OVACD73;AT3;AT3-OVA-CD73;AT3;Mammary carcinoma;TNBC
+F9;F9;OTT6050;F9;OTT6050;Teratocarcinoma;GCTC
+AT3OVACD73IL12p35;AT3OVACD73IL12p35;AT3;AT3-OVA-CD73-IL12p35;AT3;Mammary carcinoma;TNBC
+D2F2E2;D2F2E2;D2F2;D2F2/E2;D2F2;Mammary carcinoma;TNBC
+EMT6;EMT6;EMT6;EMT6;EMT6;Mammary carcinoma;TNBC
+EMT6DDP;EMT6DDP;EMT6;EMT6;EMT6;Mammary carcinoma;TNBC
+EMT6P;EMT6P;EMT6;EMT6;EMT6;Mammary carcinoma;TNBC
+EMT6PCTX;EMT6PCTX;EMT6;EMT6;EMT6;Mammary carcinoma;TNBC
+TUBOA5;TUBO;TUBO;TUBO.5;TUBO;Mammary carcinoma;TNBC
+NDL;NDL;NDL;NDL;NDL;Mammary carcinoma;TNBC
+NSC;NSC;NSCmedulloblastoma;NSC;NSC medulloblastoma;Medulloblastoma;MB
+Ptch1;Ptch1;Ptch1medulloblastoma;Ptch1;Ptch1 medulloblastoma;Medulloblastoma;MB
+HOPC;HOPC;HOPC;HOPC 1F/12;HOPC 1F/12;Plasmacytoma;Plasmacytoma
+4434;4434;;;;Melanoma;SKCM
+B16;B16;B16;B16;B16;Melanoma;SKCM
+B16BL6;B16BL6;B16F10;B16-BL6;B16-F10;Melanoma;SKCM
+B16CD133;B16F10;B16F10;B16-CD133;B16-F10;Melanoma;SKCM
+J558;J558;J558;J558;J558;Plasma cell myeloma;MM
+K7M2;K7M2;K7;K7M2;K7;Osteosarcoma;OS
+B16F10;B16F10;B16F5;B16-F10;B16-F5;Melanoma;SKCM
+B16F10_IDO;B16F10_IDO;B16F10;B16-F10-IDO;B16-F10;Melanoma;SKCM
+B16F10GP;B16F10;B16F10;B16-F10-GP;B16-F10;Melanoma;SKCM
+B16F10IDO;B16F10_IDO;B16F10;B16-F10-IDO;B16-F10;Melanoma;SKCM
+B16F10luc2;B16F10;B16F10;B16-F10-luc;B16-F10;Melanoma;SKCM
+B16F10PDL1;B16F10PDL1;B16F10;B16-F10-PDL1;B16-F10;Melanoma;SKCM
+B16F1DR4;B16;B16F1;B16F1-DR4;;Melanoma;SKCM
+M39M;M39M;M39M;M3-9M;M3-9M;Rhabdomyosarcoma;RMS
+B16Fluc;B16;B16F1;B16-luc;B16-F1;Melanoma;SKCM
+B16IDO;B16F10_IDO;B16F10;B16-F10-IDO;B16-F10;Melanoma;SKCM
+B16OVA;B16OVA;B16;B16-OVA;B16;Melanoma;SKCM
+B78;B16;B16;B78-D14;B16;Melanoma;SKCM
+D4M3A;D4M3A;D4M3A;D4M3A;D4M3A;Melanoma;SKCM
+HCmel3;HCmel3;HCmel3;HCmel3;HCmel3;Melanoma;SKCM
+SW1;SW1;K1735;SW1;K1735;Melanoma;SKCM
+Y11GFI;Y11GFI;YUMM11;Y11-GFI;YUMM1.1;Melanoma;SKCM
+MCA205;MCA205;MCA205;MCA-205;MCA-205;Fibrosarcoma;STS
+YUMM17;YUMM17;YUMM17;YUMM1.7;YUMM1.7;Melanoma;SKCM
+MethA;MethA;MethA;Meth A Sarcoma;Meth A Sarcoma;Fibrosarcoma;STS
+AB12;AB12;AB12;AB12;AB12;Mesothelioma;MM
+AB1HA;AB1HA;AB1;AB1;AB1;Mesothelioma;MM
+RN5;RN5;RN5;;;Mesothelioma;MM
+AGN2a;AGN2a;Neuro2a;AGN2a;Neuro-2a;Neuroblastoma;NB
+Neuro2A;Neuro2A;C1300;Neuro-2a;C-1300;Neuroblastoma;NB
+NXS2;NXS2;NXS2;NXS2;NXS2;Neuroblastoma;NB
+Emumyc;Emumyc;NA;E-mu-myc;NA;Non-hodgkin lymphoma;NHL
+2F8;2F8;P3X63Ag8U1;2F8;P3X63Ag8U.1;Ovarian cancer;OC
+2F8cis;2F8cis;2F8;2F8;2F8;Ovarian cancer;OC
+ID8;ID8;ID8;ID8;ID8;Ovarian cancer;OC
+ID8luc;ID8;ID8;ID8;ID8;Ovarian cancer;OC
+ID8PDL1;ID8PDL1;ID8;ID8;ID8;Ovarian cancer;OC
+ID8VEGFDefensin;ID8VEGFDefensin;ID8;ID8;ID8;Ovarian cancer;OC
+KPC4662;KPC4662;KPC4662;KPC.4662;KPC.4662;Pacreatic cell adenocarcinoma;PCA
+KPCLuc;KPC;NA;KPC-luc;NA;Pacreatic cell adenocarcinoma;PCA
+PDA;KPC;KPC;PDA;KPC;Pacreatic cell adenocarcinoma;PCA
+Pan02;Pan02;Pan02;Pan02;Pan02;Pancreatic adenocarcinoma;PDAC
+KPOVA;KP;;;;Pancreatic ductal adenocarcinoma;PDAC
+KPPC;KPPC;;;;Pancreatic ductal adenocarcinoma;PDAC
+KrasPDAC;KrasPDAC;KrasPDAC;Kras-PDAC;Kras-PDAC;Pancreatic ductal adenocarcinoma;PDAC
+Panc02;Panc02;Panc02;Panc02;Panc02;Pancreatic ductal adenocarcinoma;PDAC
+TRAMPC1;TRAMPC1;TRAMPC1;TRAMP-C1;TRAMP-C1;Prostate adenocarcinoma;MCRPC
+TRAMPC2;TRAMPC2;TRAMPC2;TRAMP-C2;TRAMP-C2;Prostate adenocarcinoma;MCRPC
+TRAMPPSA;TRAMPC1;TRAMPC1;TRAMP-PSA;TRAMP-C1;Prostate adenocarcinoma;MCRPC
+Renca;Renca;Renca;Renca;Renca;Renal carcinoma;RCC
+TBP3743;TBP3743;TBP3743;TBP-3743;TBP-3743;Anaplastic thyroid carcinoma;ATC
+TC1;TC1;TC1;TC-1;TC-1;Hybridoma;Hybridoma
+RENCAluc;Renca;Renca;Renca-luc;Renca;Renal carcinoma;TCC
+TTJ;TTJ;TTJ;TTJ;TTJ;Renal carcinoma;RCC
+LY2;LY2;Pam212;Pam LY-2;Pam 212;Skin Squamous cell carcinoma;SKCM
+SCC7;SCC7;SCC7;SCC7;SCC7;Squamous cell carcinoma;HNSCC
+C3;C3;C3;C3;C3;Squamous cell carcinoma of the oral cavity;HNSCC
+MOC1;MOC1;MOC1;MOC1;MOC1;Squamous cell carcinoma of the oral cavity;HNSCC
+MOC2;MOC2;MOC2;MOC2;MOC2;Squamous cell carcinoma of the oral cavity;HNSCC
+MOC2E6E7;MOC2E6E7;MOC2;MOC2-E6/E7;MOC2;Squamous cell carcinoma of the oral cavity;HNSCC
+MOC2E6E7Sox2;MOC2E6E7Sox2;MOC2;MOC2-E6/E7-SOX2;MOC2;Squamous cell carcinoma of the oral cavity;HNSCC
+SCLC;SCLC;NA;SCLC;NA;Squamous cell lung cancer;NSCLC
+EL4;EL4;EL4;EL4;EL4;T-cell lymphoma;TCL
+mEER;mEER;mEER;mEER;mEER;Tonsil epithelial cells;HNSCC

@@ -1,0 +1,237 @@
+﻿Name;Descritption;Target;Dosing_Units;Type of therapy
+A2ARi;Small molecule inhibitor of the adenosine A2A Receptor;A2AR;mg/kg;Targeted therapy
+Ad5IiGP;Vaccine using replication deficient E1-deleted Ad5 vector with a non-functiona E3 gene expressing GP LCMV liked to the mure invariant chain Ii;APCs;10^6 PFU;Immunotherapy
+ADT;Androgen depravation therapy;Androgen;mg/kg;Targeted therapy
+aFP;Ablative fractional photothermolysis;Tumor cells;mJ;Photothermolysis
+ALDHhighDC;Vaccine using ALDH-high expressing cancer stem cells lysed and given with DC;APCs;10^6 cells;Immunotherapy
+ALDHlowDC;Vaccine using ALDH-low tumor cells lysed and given with DCs;APCs;10^6 cells;Immunotherapy
+alphaGalCerVacc;Vaccination with irradiated tumor cells previously loaded with alpha-GalCer;NK cells;10^6 cells;Immunotherapy
+ALT803;IL-15 superagonist variant IL-1572ND in a complex with a human IL-15Ralpha sushi domain-Fc fusion protein;T-cells;mg/kg;Cytokine
+anti41BB;4-1BB agonist;4-1BB;mg/kg;Immunotherapy
+antiBeta8;alpha-nu-beta-8 integrin antagonist;alpha-nu-beta-8 integrin;mg/kg;Immunotherapy
+antiCD19;Depletion of B-cells (CD19+);CD19+ B-cells;mg/kg;Targeted therapy
+antiCD226;Systemic administration of CD226 antagonist mAb ;CD226;mg/kg;Immunotherapy
+antiCD25;Depletion of Tregs (CD25+);CD25+ Tregs;mg/kg;Targeted therapy
+antiCD4;Depletion of CD4+ T-cells;CD4+ T-cells;mg/kg;Targeted therapy
+antiCD40;Systemic administration of CD40 agonist mAb;CD40;mg/kg;Immunotherapy
+antiCD47;Systemic admiistration of CD47 antagonist mAb;CD47;mg/kg;Immunotherapy
+antiCD73;Systemic admiistration of CD473 antagonist mAb;CD73;mg/kg;Immunotherapy
+antiCTLA4;CTLA-4 antagonist;CTLA-4;mg/kg;ICB
+antiCTLA4GVAX;CTLA-4 antagonist locally secreted by a GVAX;CTLA-4;10^6 cells;Vaccine+ICB
+antiCTLA4PIGF2;anti-CTLA-4 antibody conjugated to an ECM-super affinity peptide derived from placenta growth factor-2 (PIGF-2_123-144);anti-CTLA-4;mg/kg;ICB
+antiDEC205HER2;Vaccine using an anti-DEC-205/HER2 mAb and poly(I:C) as adjuvant;Tumor cells, APCs;mg/kg;Immunotherapy
+antiGITR;Systemic administration of GITR antagonist mAb;GITR;mg/kg;ICB
+antiHER2;Systemic administration of HER-2 antagonist mAb;HER-2;mg/kg;Targeted therapy
+antiICAM2;Systemic administration of ICAM-2 antagonist mAb;ICAM-2;mg/kg;Immunotherapy
+antiIL4;Systemic administration of IL-4 antagonist mAb;IL-4;mg/kg;Immunotherapy
+antiLAG3;Systemic administration of LAG-3 antagonist mAb;LAG-3;mg/kg;ICB
+antiLy6G;Systemic administration of Ly6G antagonist mAb;Ly6G;mg/kg;Immunotherapy
+antiOX40;Systemic administration of OX-40 agonist mAb;OX-40;mg/kg;Immunotherapy
+antiPD1;Systemic administration of PD-1 antagonist mAb;PD-1;mg/kg;ICB
+antiPD1NP;anti-PD-1 nanoparticles;PD-1;mg/kg;ICB
+antiPD1TGFR1iNP;PD-1 targeted nanoparticles carryng a TGF-beta receptor 1 inhibitor;PD-1, TGF-betaR1;mg/kg;Immunotherapy
+antiPD1TLR78NP;PD-1 targeted nanoparticles carrying a TLR7/8 agonist;PD-1, TLR7/8;mg/kg;Immunotherapy
+antiPDL1;Systemic administration of PD-L1 antagonist mAb;PD-L1;mg/kg;ICB
+antiPDL1131I;Radioimmunotherapy with an anti-PD-L1 mAb radiolabeled with iodine-131;Tumor cells;mg/kg;Radioimmunotherapy
+antiPDL1PIGF2;anti-PD-1 antibody conjugated to an ECM-super affinity peptide derived from placenta growth factor-2 (PIGF-2_123-144);anti-PD-1;mg/kg;ICB
+antiPDL2;Systemic administration of PD-L2 antagonist mAb;PD-L2;mg/kg;ICB
+antiSEMA4D;Systemic administration of SEMA-4D antagonist mAb;Semaphorin 4D;mg/kg;Immunotherapy
+antiTGFbeta;Systemic administration of TGF-beta antagonist mAb;TGF-Beta;mg/kg;Immunotherapy
+antiTIGIT;Systemic administration of TIGIT antagonist mAb;TIGIT;mg/kg;ICB
+antiTIM3;Systemic administration of TIM-3 antagonist mAb;TIM-3;mg/kg;ICB
+antiVEGF;Systemic administration of VEGF antagonist mAb;VEGF;mg/kg;Targeted therapy
+Axitinib;Tyrosine kinase inhibitor;VEGFR-1, -2, -3;mg/kg;Targeted therapy
+AXLi;Inhibition of the receptor tyrosine kinase AXL;AXL;mg/kg;Targeted therapy
+BRAFi;BRAF inhibition;BRAF;mg/kg;Targeted therapy
+Carmustine;Systemic administration of chemotherapeutic agent Carmustine;Tumor cells;mg/kg;Chemotherapy
+CD80CD137Vacc;Vaccine unsing irradiated tumor cells transfected to express CD80 and CD137 ligand;APCs;10^6 cells;Immunotherapy
+CDK46i;Inhibtion of cyclin-dependent kinases 4 and 6;Tumor cells;mg/kg;Targeted therapy
+CFSRi;CSF-R kinase inhibitor;CFS-R;ppm;Immunotherapy
+Cisplatin;Systemic administration of chemotherapeutic agent cisplatin;Tumor cells, APCs;mg/m^2;Chemotherapy
+Cryotherapy;Cryotherapy;Tumor;;Cryotherapy
+Cyclophosphamide;Systemic administration of chemotherapeutic agent Cyclophosphamide;Tumor cells;mg/kg;Chemotherapy
+D24RGDOX;Oncolytic adenovirus expressing OX40 ligand;Tumor cells, APCs;10^6 PFU;Virotherapy
+Dexamethasone;Corticosteroid treatment meant to alleviate immune-related adverse effects of IT;-;mg/kg;Corticosteroid
+Diet;Protein-restricted diet;Tumor associated macrophages;mg/kg;Diet
+DNMTi;DNA methyltransferase inhibitor;;mg/kg;Epigenetic therapy
+DOX;Systemic administration of chemotherapeutic agent doxurubicin;Tumor cells;mg/kg;Chemotherapy
+Doxil;Liposomal doxorubicin;Tumor cells;mg/kg;Chemotherapy
+DOXINDLiposome;Liposome delivery of chemotherapy drug doxorubicin and IDO-inhibitor Indoximod;Tumor cells, APCs;mg/kg;Chemotherapy
+E7p;Vaccination with immunogenic peptide;APCs;mg/kg;Immunotherapy
+E7pPC7A;Vaccination with immunogenic peptide mixed with a synthetic polymeric nanoparticle PC7A NP ;APCs;mg/kg;Immunotherapy
+E7Vacc1;Vaccination with the 9-mer peptide from HPV16 E7_49-57, GM-CSF, and anti-CD40;APCs;mg/kg;Immunotherapy
+E7Vacc2;Vaccination with HPV16 E7_49/57 peptide mixed with synthethic T helper epitope PADRE and QuilA adjuvant;APCs;mg/kg;Immunotherapy
+Entinostat;Histone deacetylase inhibitor;;mg/kg;Epigenetic therapy
+EP;Empty polymer, control group;-;mg/kg;Control
+EVV;"Empty vector vaccine, irradiated tumor cells transfected with an empty vector; control group";APCs;10^6 cells;Immunotherapy
+Fc25F;2.5F-Fc: Fc-fusion to an integrin-binding peptide;RGD-binding integrins;mg/kg;Immunotherapy
+Flouracil;Systemic administration of chemotherapeutic agent 5-Fluoracil;Tumor cells;mg/kg;Chemotherapy
+FVAX;Vaccination with irradiated tumor cells transfected with Flt3 ligand;APCs;10^6 cells;Immunotherapy
+G1;Agonist activation of GPER signaling;GPER;mg/kg;Targeted therapy
+Gemcitabine;Systemic administration of chemotherapeutic agent Gemcitabine;Tumor cells;mg/kg;Chemotherapy
+GITRLFP;GITR ligand fusion protein;GITR;mg/kg;Immunotherapy
+GK1peptide;Vaccination with GK-1, a peptide from Taenia crassiceps cisticerci;APCs;mg/kg;Immunotherapy
+GVAX;Vaccination with GM-CSF-trasfected irradiated tumor cells;APCs;mg/kg;Immunotherapy
+HSPC;Cell transfer of hematopoietic stem/progenitor cells;-;10^6 cells;Immunotherapy
+HSV1716;Herpes simplex virus-1 mutant 1716 deleted in the RL1 gene;Tumor cells;mg/kg;Virotherapy
+Ibrutinib;BTK and ITK inhibitor;BTK, ITK;mg/kg;Targeted therapy
+IDOi;Inhibition of IDO;Immune cells;mg/kg;Immunotherapy
+IFNa;Systemic administratio of IFN-alpha;Immune cells;mg/kg;Immunotherapy
+Ifosfamide;Systemic administration of chemotherapeutic agent ifosfamide;Tumor cells;mg/kg;Chemotherapy
+IgG;Control IgG;-;mg/kg;Control
+IL15;Systemic administration of IL-15;IL-15R;mg/kg;Immunotherapy
+IL18;Systemic administration of IL-18;IL-18R;mg/kg;Immunotherapy
+IL21;Systemic administration of IL-21;IL-21R;mg/kg;Immunotherapy
+IL21.2;Systemic administration of IL-21.2;IL-21R;mg/kg;Immunotherapy
+IL21.3;Systemic administration of IL-21.3;IL-21R;mg/kg;Immunotherapy
+IL8;Systemic administration of IL-8;IL-8R;mg/kg;Immunotherapy
+INDLiposome;Liposome delivery of IDO-inhibitor Indoximod;IDO;mg/kg;Immunotherapy
+JX;GM-CSF-armed oncolytic vaccinia virus;Tumor cells;10^6 PFU;Virotherapy
+L19IL12;IL-12 fused to human L19 antibody;APCs;mg/kg;Immunotherapy
+lantiCTLA4;Local delivery of anti-CTLA-4;CTLA-4;mg/kg;ICB
+Larg;Orally-delivered administration of L-arginine;T-cells;mg/kg;Immunotherapy
+lCarmustine;Locally-delivered via polymer to tumor dose of chemotherapeutic agent Carmustine;Tumor cells;mg/kg;Chemotherapy
+lTemozolomide;Locally-delivered via polymer to tumor dose of chemotherapeutic agent Temozolomide;Tumor cells;mg/kg;Chemotherapy
+LXRBeta;Oral administration of LXR agonists;LXR-beta;mg/kg/day;Targeted therapy
+MCMVgp100;Murine Megalocytovirus transfected with gp100-peptide;APCs;10^6 PFU;Virotherapy
+MCPAPTX;Sonic hedgehog inhibitor  (cyclopamine) delivered with a  cytotoxic chemotherapy drug (paclitaxel) via a polymeric micelle-based nanoformulation;Tumor stroma;mg/kg;Targeted therapy
+MDSC;Cell transfer of myeloid-derived suppressor cells;-;10^6 cells;Immunotherapy
+MEKi;MAPK kinase inhibitor;MAPK kinase;mg/kg;Targeted therapy
+mMSC-oHSV;Mesenchymal stem cells armed with oncolytic herpes simplex virus;Tumor cells;10^6 cells;Virotherapy + stemm cell therapy
+Mocetinostat;Class I/IV HDAC inhibitor;class I/IV HDAC;mg/kg;Immunotherapy
+MSAIL2;MSA/IL-2: Mouse serum albumin IL-2 fusion;IL-2 receptor;mg/kg;Cytokine
+mTORi;Inhbition of mTOR;mTOR;mg/kg;Targeted therapy
+MVABNHER2;Recombinant modified vaccinia Ankara cevtor expressing a modified form of the extracellular domain of HER-2;APCs;10^6 PFU;Immunotherapy
+NDV;Oncolytic Newcastle disease virus;Tumor cells;10^6 PFU;Virotherapy
+NHE1i;Inhibition of Na/H exchanger isoform 1;Tumor cells, Macrophages;mg/kg;Targeted therapy
+oHSVG47delta;Oncolytic herpes simplex virus expressing IL-12;Tumor cells, APCs;10^6 PFU;Virotherapy
+OX40LFP;OX40 ligand fusion protein;OX40 ;mg/kg;Immunotherapy
+PDT;Photodynamic therapy;Tumor cells, APCs;J/cm2;Photodynamic therapy
+Peptide;Vaccination with montanide-E6/E7 peptide emulsion;APCs;ml;Immunotherapy
+PI3Kalphai;Inhbition of PI3Kalpha;PI3K-alpha;mg/kg;Targeted therapy
+PI3Kdeltagammai;Inhibition of PI3K-delta/gamma ;PI3K-delta/gamma;mg/kg;Targeted therapy
+PLGVacc;PLG scaffolds containing GM-CSF, tumor lysate and CpG-ODN;APCs;ND;Immunotherapy
+polyIC;Immunostimulant;TLR-3;mg/kg;Immunotherapy
+R848;Resiquimod, TLR7/8 agonist;TLR7/8;mg/kg;Immunotherapy
+R848NP;TLR7/8 agonist delivered via nanoparticles;TLR7/8;mg/kg;Immunotherapy
+Reovirus;Oncolytic reovirus Type 3 Dearing strain;Tumor cells;10^6 PFU;Virotherapy
+rMVAp53;Recombinant modified vaccinia virus Ankara expressing mouse wild type p53;Tumor cells;10^6 PFU;Virotherapy
+rMVApp65;Recombinant modified vaccinia virus Ankara expressing pp65;Tumor cells;10^6 PFU;Virotherapy
+rrVSV;Recombinant replicating vesicular stomatitis virus;Tumor cells;ID;Virotherapy
+RT;Radiotherapy;Tumor cells;Gy;Radiotherapy
+SatVax;Vaccination with E6_43-57 Q15L, E7_49-57 R9F, and E7_44-62 Q19D, delivered via nanosatellies in conjunction with cGAMP ;APCs;mg/kg;Immunotherapy
+Sorafenib;Inhibition of c-Kit;c-Kit;mg/kg;Targeted therapy
+SPx;Spleenectomy;Spleen;-;Spleenectomy
+STINGa;Agonist activation of STING signalling;Tumor cells, APCs;mg/kg;Immunotherapy
+Temozolomide;Systemic administration of chemotherapeutic agent Temozolomide;Tumor cells;mg/kg;Chemotherapy
+TGFBetaR1i;TGF-Beta receptor 1 inhibitor;TGF-Beta receptor 1;mg/kg;Immunotherapy
+TGFBetaR1iNP;TGF-Beta receptor 1 inhibitor delivered via nanoparticle;TGF-Beta receptor 1;mg/kg;Immunotherapy
+TH302;Hypoxia-activated prodrug;Vasculature;mg/kg;Targeted therapy
+Trabectedin;Synthetic, marine-derived agent that binds to the minor groove of DNA bending the helix to the major groove, perturbin thte cell cycle;Tumor cells, TAMs, MDSCs;mg/kg;Targeted therapy
+TRT;Targeted radionuclide therapy with 177Lu-DOTA-PEG_4-LLP2A;VLA-4;mg/kg;Targeted therapy
+TUSC2;Nanovesicle-baed delivery of TUSC2, a tumor suppressor gene;Tumor cells, NK cells;mg/kg;Gene therapy
+TVEC;Talimogene laherparepvec, herpes simplex type 1 oncolytic virus;Tumor cells;10^5 PFU;Immunotherapy
+Vacc;Heat schocked and irradiated tumor cells injected with a TLR7/8 agonist;APCs;10^6 cells;Immunotherapy
+VV;Oncolytic virotherapy using a vaccinia virus expressing CXCL11;Tumor cells, T cells;10^6 PFU;Virotherapy
+WR;Engineered vaccinia virus, Western Reserve strain, doubly deleted for thymidine kinase and ribonucleotide reductase with Fcu1 inserted at the Tk locus;Tumor cells;10^6 PFU;Virotherapy
+WTMCMV;Wild type murine cytomegalovirus;APCs;10^6 PFU;Virotherapy
+;;;;
+;;;;
+;;;;
+;;;;
+;;;;
+;;;;
+;;;;
+;;;;
+;;;;
+;;;;
+;;;;
+;;;;
+;;;;
+;;;;
+;;;;
+;;;;
+;;;;
+;;;;
+;;;;
+;;;;
+;;;;
+;;;;
+;;;;
+;;;;
+;;;;
+;;;;
+;;;;
+;;;;
+;;;;
+;;;;
+;;;;
+;;;;
+;;;;
+;;;;
+;;;;
+;;;;
+;;;;
+;;;;
+;;;;
+;;;;
+;;;;
+;;;;
+;;;;
+;;;;
+;;;;
+;;;;
+;;;;
+;;;;
+;;;;
+;;;;
+;;;;
+;;;;
+;;;;
+;;;;
+;;;;
+;;;;
+;;;;
+;;;;
+;;;;
+;;;;
+;;;;
+;;;;
+;;;;
+NA;;;;
+RT;;;;
+Cryotherapy;;;;
+TVEC;;;;
+TRT;;;;
+JX;;;;
+HDACi;;;;
+FVAX;;;;
+antiPDL1;;;;
+GVAX;;;;
+antiPD1;;;;
+Vaccine;;;;
+Temozolomide;;;;
+antiOX40;;;;
+IDOi;;;;
+TH302;;;;
+Ifosfamide;;;;
+antiCTLA4;;;;
+antiTIGIT;;;;
+DNMTi;;;;
+MSAIL2;;;;
+antiDEC205HER2;;;;
+Cisplatin;;;;
+Paclitaxel;;;;
+IL18;;;;
+TUSC2;;;;
+E7Vacc1;;;;
+mTORi;;;;
+Cyclophosphamide;;;;
+oHSVG47delta;;;;
+E7Vacc2;;;;
+STINGa;;;;
+Gemcitabine;;;;
+Dexamethasone;;;;
+PI3Kalphai;;;;
+Sorafenib;;;;
+IL15;;;;
