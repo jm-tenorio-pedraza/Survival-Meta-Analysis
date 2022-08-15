@@ -7,8 +7,8 @@ library(latex2exp)
 library(openxlsx)
 outputFilePath<-'~/Documents/Thesis/Results/'
 # Load models based on which vars to study:
-clin.var<-'PFS_HR'
-pre.var<-'HR'
+clin.var<-'OS_HR'
+pre.var<-'MR'
 if(clin.var=='OS_HR'){
   load(file=paste(outputFilePath,'OS_HR_clinical.m0.RData',sep = ''))
   load(file=paste(outputFilePath,'OS_HR_clinical.m1.RData',sep = ''))
@@ -84,23 +84,38 @@ trans.m1.df<-trans.m1.df[transSortIndx,]
 # Save predictions
 write.xlsx(trans.m1.df,file=paste(outputFilePath,'Clinical_',clin.var,'_Preclinical_',pre.var,'_Predictions_Model1.xlsx',sep=''))
 
-# Plot the first 30 best predictions
-with(trans.m1.df[1:40,],plot((Preclinical.Est),exp(y)))
-abline(0,1)
+# Plot the predictions vs clinical dta
+pred.m1.plot<-ggplot(trans.m1.df,aes(x=Preclinical.Est,y=exp(y),color=CANCER))+
+  geom_point()+
+  labs(title='Predictions of clinical efficacy', 
+       subtitle=paste('Preclinical model predictions (',pre.var,') vs clinical efficacy (', clin.var,')',sep=''))+
+  xlab('Preclinical predictions') +
+  ylab('Clinical efficacy')+
+  geom_abline(slope=1,intercept = 0,linetype=2,color='black')+
+  scale_x_continuous(limits=c(0.3,1.2))+
+  scale_y_continuous(limits=c(0.3,1.2))+
+  theme_minimal()+
+  scale_color_discrete()+
+  theme(plot.title=element_text(size=16,face="bold",family="Helvetica"),
+        axis.title=element_text(size=12,face="bold",family="Helvetica"))
+pred.m1.plot
+ggsave(pred.m1.plot, file=paste(outputFilePath,'Model1_Predictions_vs_Data_Preclinical_', pre.var, '_vs_Clinical_', clin.var,'.png',sep=''),
+       width = 10, height=8, dpi=300,bg='white')
 
 # Plot by cancer type and treatment ( omit large errors to show distribution)
-(trans.m1.plot<-ggplot(trans.m1.df[1:66,],aes(x=TreatmentLabels, y=exp(y)-(Preclinical.Est),color=CANCER))+
+(trans.m1.plot<-ggplot(trans.m1.df[1:dim(trans.m1.df)[1],],aes(x=TreatmentLabels, y=exp(y)-(Preclinical.Est),color=CANCER))+
   geom_point()+
   labs(color='Cancer',  size='Number of cell lines',title='Prediction errors for clinical efficacy estimates based on preclinical model',
        subtitle=paste('Preclinical', x.label, 'vs', 'Clinical',y.label,sep=' '),
                        y='Data - prediction')+
     ylab(TeX('y - $\\hat{y}$ (Preclinical model prediction errors)'))+
+    xlab('Treatments')+
   theme_minimal()+
   scale_color_discrete()+
   theme(plot.title=element_text(size=16,face="bold",family="Helvetica"),
         axis.title=element_text(size=12,face="bold",family="Helvetica"),
         axis.text.x=element_text(angle=45,vjust=.5)))
-ggsave(trans.m1.plot, file=paste('/Users/migueltenorio/Documents/Thesis/Results/Model1_Error_Preclinical_', pre.var, '_vs_Clinical_', clin.var,'.png',sep=''),
+ggsave(trans.m1.plot, file=paste(outputFilePath,'Model1_Error_Preclinical_', pre.var, '_vs_Clinical_', clin.var,'.png',sep=''),
        width = 10, height=8, dpi=300,bg='white')
 
 # Calculate average SqE by cancer
@@ -122,20 +137,25 @@ trans.m1.df$Study_Treatments<-paste(trans.m1.df$STUDY_ID,trans.m1.df$Treatments,
 trans.m1.df<-join(trans.m1.df,clinical.m1.df[,c('Study_Treatments','Prediction')],by='Study_Treatments')
 trans.m1.df<-trans.m1.df[!is.na(trans.m1.df$Prediction),]
 
+# Save unique cancer-type specific treatment estimates
+trans.m1.df$Treat_Cancer<-paste(trans.m1.df$Treatments,trans.m1.df$CANCER,sep='_')
+trans.m1.df.sub<-trans.m1.df[match(unique(trans.m1.df$Treat_Cancer),trans.m1.df$Treat_Cancer),]
+write.xlsx(trans.m1.df.sub,file=paste(outputFilePath,'Clinical_',clin.var,'_Preclinical_',pre.var,'CancerTypeUniquePred.xlsx',sep=''))
+
 # Plotting fitting errors to prediction errors
-(errors.m1.plot<-ggplot(trans.m1.df[1:66,],aes(x=exp(y)-exp(Prediction),y=exp(y)-Preclinical.Est,color=TreatmentLabels))+
+(errors.m1.plot<-ggplot(trans.m1.df[1:dim(trans.m1.df)[1],],aes(x=exp(y)-exp(Prediction),y=exp(y)-Preclinical.Est,color=TreatmentLabels))+
   geom_point()+
   labs(color='Treatment', title='LOO errors vs prediction errors',
        subtitle=paste('Preclinical', x.label, 'vs', 'Clinical',y.label,sep=' '))+
     xlab(TeX('y - $\\hat{y}$ (Clinical fitting errors)'))+
-    ylab(TeX('y - $\\hat{y}$ (Clinical prediction errors)'))+
+    ylab(TeX('y - $\\hat{y}$ (Preclinical to clinical prediction errors)'))+
     theme_minimal()+
   scale_color_discrete()+
     geom_abline(slope=1,intercept=0,size=.3)+
   theme(plot.title=element_text(size=16,face="bold",family="Helvetica"),
         axis.title=element_text(size=12,face="bold",family="Helvetica"),
         axis.text.x=element_text(angle=45,vjust=.5)))
-ggsave(errors.m1.plot, file=paste('/Users/migueltenorio/Documents/Thesis/Results/Model1_Prediction_Error_Preclinical_', pre.var, '_vs_LOO_Errors_Clinical_', clin.var,'.png',sep=''),
+ggsave(errors.m1.plot, file=paste(outputFilePath,'Model1_Prediction_Error_Preclinical_', pre.var, '_vs_LOO_Errors_Clinical_', clin.var,'.png',sep=''),
        width = 10, height=8, dpi=300,bg='white')
 mse.clin<-with(trans.m1.df,crossprod(exp(y)-exp(Prediction))/dim(trans.m1.df)[1])
 mse.preclin<-with(trans.m1.df,(crossprod((Preclinical.Est)-exp(y)))/dim(trans.m1.df)[1])
@@ -150,10 +170,10 @@ treatments<-preclinical.treatments[transIndx]
 newmods.mat<- diag(1,nrow=length(preclinical.m0$beta))*as.numeric(transIndx)
 rowIndx<-apply(newmods.mat,1,function(x)all(x==0))
 newmods.mat<-newmods.mat[!rowIndx,]
-preclinical.m0.df<-(predict(preclinical.m0,newmods =newmods.mat))
+preclinical.m0.df<-(predict(preclinical.m0,newmods =newmods.mat,vcov=TRUE))
 preclinical.m0.df<-data.frame('Treatments'=treatments,
-                            'Preclinical.Est'=preclinical.m0.df$pred,'Preclinical.LB'=preclinical.m0.df$ci.lb,
-                            'Preclinical.UB'=preclinical.m0.df$ci.ub)
+                            'Preclinical.Est'=preclinical.m0.df$pred$pred,'Preclinical.LB'=preclinical.m0.df$pred$ci.lb,
+                            'Preclinical.UB'=preclinical.m0.df$pred$ci.ub,'Preclinical.SE'=sqrt(diag(preclinical.m0.df$vcov)))
 clinical.m0.df<-(predict(clinical.m0,newmods=diag(1,length(clinical.treatments))))
 clinical.m0.df<-data.frame('Treatments'=clinical.treatments,'Clinical.Est'=clinical.m0.df$pred,'Clinical.SE'=clinical.m0.df$se,'Clinical.LB'=clinical.m0.df$ci.lb,
                         'Clinical.UB'=clinical.m0.df$ci.ub)
@@ -162,7 +182,7 @@ trans.m0.df<-join(clinical.m0.df,preclinical.m0.df,by='Treatments',type='inner')
 trans.m0.df[,c(2,4:8)]<-exp(trans.m0.df[,c(2,4:8)])
 
 ## Fitting model
-trans.m1<-glm(Clinical.Est~log(Preclinical.Est),gaussian(link='log'),start=c(0,1),weights=1/Clinical.SE^2,data=trans.m0.df)
+trans.m1<-glm(Clinical.Est~log(Preclinical.Est),gaussian(link='log'),start=c(0,1),weights=1/Preclinical.SE^2,data=trans.m0.df)
 summary(trans.m1)
 
 # Create prediction dataset
@@ -185,7 +205,7 @@ predtrans.df$y.hat.UB<-y.hat$fit+y.hat$se.fit
   geom_line(data=predtrans.df,aes(x=(x.hat),y=y.hat))+
   geom_ribbon(data=predtrans.df,aes(ymin=y.hat.LB,ymax=y.hat.UB),fill='blue',alpha=.1)+
   scale_x_continuous(limits=c(0,1.5))+
-  scale_y_continuous(limits=c(0,1.5))+
+  scale_y_continuous(limits=c(0,2.0))+
   labs(color='Treatment',y='Clinical treatment effects (95% CI)',x="Preclinical treatment effects",
        title='Translatability potential of preclinical efficacy into clinical improvements in survival',
        subtitle=paste('Preclinical (', pre.var, ') vs clinical (',clin.var,') treatment effects',sep=''))+
@@ -194,7 +214,7 @@ predtrans.df$y.hat.UB<-y.hat$fit+y.hat$se.fit
   theme(plot.title=element_text(size=16,face="bold",family="Helvetica"),
         axis.title=element_text(size=12,face="bold",family="Helvetica")))
 
-ggsave(trans.plot, file=paste('/Users/migueltenorio/Documents/Thesis/Results/Preclinical_', pre.var, '_vs_Clinical_', clin.var,'.png',sep=''),
+ggsave(trans.plot, file=paste(outputFilePath,'Preclinical_', pre.var, '_vs_Clinical_', clin.var,'.png',sep=''),
        width = 10, height=8, dpi=300,bg='white')
 
 # Average overestimation

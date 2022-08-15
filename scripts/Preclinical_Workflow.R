@@ -1,6 +1,6 @@
 rm(list=ls())
 load('~/Documents/GitHub/Survival-Meta-Analysis/output/PreclinicalSubset.RData')
-source('~/Documents/GitHub/Survival-Meta-Analysis/scripts/DataProcessingFunctions.R')
+source('~/Documents/GitHub/Survival-Meta-Analysis/functions/DataProcessingFunctions.R')
 library(ggplot2)
 library(openxlsx)
 library(metafor)
@@ -15,7 +15,7 @@ treatments<-unique(meta.df$Treatments)
 treatment.labels<-gsub('_',' + ',treatments)
 treatment.labels<-gsub('anti','anti-',treatment.labels)
 # Determine which dependent vars to study
-var.y<-'MR'
+var.y<-'HR'
 if(var.y=='HR'){
   # For HRs:
   meta.df$y<-meta.df$HR
@@ -71,6 +71,7 @@ for(i in 2:length(m0.sub.tf)){
   df$Treatment<-treatments[i]
   m0.df<-rbind(m0.df,df)
 }
+m0.df$Fill.in<-factor(m0.df$Fill.in)
 # Funnel plots for each treatment
 m0.funnel<-plotTF(m0.df)
 m0.funnel<-m0.funnel+labs(title=paste('Trim-and-fill analysis for ',y.legend,sep=''),
@@ -80,13 +81,19 @@ m0.funnel
 # Save results
 ggsave(m0.funnel, file=paste(outputFilePath,'Preclinical_TrimFill_Full_m0_', var.y,'.png',sep=''),
        width = 10, height=8, dpi=300,bg='white')
-m0.funnel.sub<-plotTF(m0.df[m0.df$Treatment%in%plotTreatments,])
-m0.funnel.sub + labs(title=paste('Trim-and-fill analysis for ',y.legend,sep=''),
+# Plot Subset of treatments
+m0.df.sub<-subset(m0.df,m0.df$Treatment%in%plotTreatments)
+# Add 1 obs that is fill-in to correct color coding
+m0.df.sub<-rbind(m0.df.sub[1,],m0.df.sub)
+m0.df.sub[1,'Fill.in']<-'Fill-in data'
+m0.df.sub[1,c('points','se')]<-c(0,0)
+m0.funnel.sub<-plotTF(m0.df.sub)
+m0.funnel.sub<-m0.funnel.sub + labs(title=paste('Trim-and-fill analysis for ',y.legend,sep=''),
                      subtitle=('ICB as monotherapy and combination therapy'))+
   xlab(x.lab.legend) + ylab(
     y.lab.legend)
 m0.funnel.sub 
-ggsave(m0.funnel, file=paste(outputFilePath,'Preclinical_TrimFill_Subset_m0_', var.y,'.png',sep=''),
+ggsave(m0.funnel.sub, file=paste(outputFilePath,'Preclinical_TrimFill_Subset_m0_', var.y,'.png',sep=''),
        width = 10, height=8, dpi=300,bg='white')
 # Number of omitted studies
 k0<-sapply(m0.sub.tf,function(x) x$k0)
