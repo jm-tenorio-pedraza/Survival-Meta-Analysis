@@ -6,7 +6,7 @@ library(metafor)
 library(ggplot2)
 library(openxlsx)
 library(future.apply)
-outputFilePath<-'~/Github/Survival-Meta-Analysis/output/'
+outputFilePath<-'~/Documents/Github/Survival-Meta-Analysis/output/'
 
 # Load model to simulate
 load(file=paste(outputFilePath,'MR','_','simModel.RData',sep=''))
@@ -237,10 +237,12 @@ names(power.3d)<-c('value','CELL','LAB','variable')
 
 power.3d<-acast(power.3d,CELL~LAB)
 
-# Power.3d.xlsx<-read.xlsx('/Users/migueltenorio/Documents/Thesis/Results/Power.3d.xlsx')
+Power.3d.xlsx<-read.xlsx('/Users/migueltenorio/Documents/GitHub/Survival-Meta-Analysis/output/Power.3d.xlsx',sheet=1)
 # power.3d<-cbind(Power.3d.xlsx,power.3d)
 write.xlsx(power.3d,file=paste(outputFilePath,'Power.3d.xlsx',sep = ''))
 
+# load file of MSE and power
+MSE.est<-read.xlsx('/Users/migueltenorio/Documents/GitHub/Survival-Meta-Analysis/output/MSE.est.summary.xlsx',sheet=1)
 ## 2-D plotof MSE
 MSE.ggplot<-ggplot(MSE.est,aes(CELL,MSE,color=LAB))+
   geom_point()

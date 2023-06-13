@@ -1,5 +1,6 @@
 # Translational workflow
 rm(list=ls())
+set.seed(123)
 library(plyr)
 library(metafor)
 library(ggplot2)
@@ -33,7 +34,7 @@ if(pre.var=='HR'){
   xaxis.label<-'Preclinical median survival ratios'
 }
 ## Load table with cancer types in rows and cell lines in columns
-cancer.mat<-read.table(file=paste(outputFilePath,'Preclinical_',pre.var,'CELL_predMat.csv',sep=''))
+cancer.mat<-read.table(file=paste(outputFilePath,'Preclinical_',pre.var,'_CELL_predMat.csv',sep=''))
 # Load table with leave-one-out cv prediction
 pred.mat<-read.table(file=paste(outputFilePath,clin.var,'_','Clinicical_LOO_Predictions.m1.csv',sep=''))
 # How many cell lines represent each type of cancer
@@ -57,6 +58,7 @@ newmods.mat<-kronecker(newmods.mat,rep(1,dim(cancer.mat)[1])) # Expand matrix of
 newmods.mat[,grep('CELL_FAMILY',preclinical.treatments)]<-kronecker((rep(1,length(treatments))),as.matrix(cancer.mat))
 # Generate predictions for each combination of cancer and treatment
 preclinical.m1.df<-(predict(preclinical.m1,newmods =newmods.mat,transf = exp))
+# Use only for cancer-specific predictions
 preclinical.m1.df<-data.frame('Treatments'=rep(treatments,each=dim(cancer.mat)[1]),
                            'CANCER'=rep(row.names(cancer.mat),length(treatments)),
                            'Preclinical.Est'=preclinical.m1.df$pred,'Preclinical.LB'=preclinical.m1.df$ci.lb,
@@ -92,6 +94,7 @@ pred.m1.plot<-ggplot(trans.m1.df,aes(x=Preclinical.Est,y=exp(y),color=CANCER))+
   xlab('Preclinical predictions') +
   ylab('Clinical efficacy')+
   geom_abline(slope=1,intercept = 0,linetype=2,color='black')+
+  #stat_smooth(method = "lm", col = "red")+
   scale_x_continuous(limits=c(0.3,1.2))+
   scale_y_continuous(limits=c(0.3,1.2))+
   theme_minimal()+
@@ -120,7 +123,7 @@ ggsave(trans.m1.plot, file=paste(outputFilePath,'Model1_Error_Preclinical_', pre
 
 # Calculate average SqE by cancer
 sort(tapply(trans.m1.df$SqE,trans.m1.df$CANCER,mean))
-f#Calculate average SqE by treatment
+#Calculate average SqE by treatment
 sort(tapply(trans.m1.df$SqE,trans.m1.df$Treatments,median))
 
 # Number of discordant pairs based on upper interval
@@ -218,13 +221,15 @@ ggsave(trans.plot, file=paste(outputFilePath,'Preclinical_', pre.var, '_vs_Clini
        width = 10, height=8, dpi=300,bg='white')
 
 # Average overestimation
-trans.m0.df$Overestimation<-with(trans.m0.df,(Preclinical.Est-Clinical.Est)/Clinical.Est*100)
+trans.m0.df$Overestimation<-with(trans.m0.df,(Preclinical.Est-Clinical.Est)*100)
 write.xlsx(trans.m0.df,file=paste(outputFilePath,'Clinical_',clin.var,'_Preclinical_',pre.var,'_TransEfficacyEst.xlsx',sep=''))
 
-with(trans.m0.df,mean((Preclinical.Est-Clinical.Est)/Clinical.Est))
-# For MR to PFS_HR: 14.85%
+with(trans.m0.df,mean(abs((Preclinical.Est-Clinical.Est)/Clinical.Est)))
+with(trans.m0.df,((crossprod(Preclinical.Est-Clinical.Est)/dim(trans.m0.df)[1])))
+
+# For MR to PFS_HR: 15.01%
 # For HR to PFS_HR: 66.58%
-# For MR to OS_HR: 15.16%
+# For MR to OS_HR: 8.78%
 # For HR to OS_HR: 67.14%
 
 # Overall HRs were really bad at predicting individual studies HR estimates

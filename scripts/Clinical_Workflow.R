@@ -1,4 +1,5 @@
 (rm(list=ls()))
+set.seed(123)
 # Clinical workflow
 library(ggplot2)
 library(metafor)
@@ -6,7 +7,7 @@ library(plyr)
 library(openxlsx)
 meta.df<-read.csv('~/Documents/GitHub/Survival-Meta-Analysis/output/clinical.red.df.csv',sep=',')
 meta.df2<-read.csv("~/Documents/GitHub/Survival-Meta-Analysis/output/clinical.df.csv")
-source('~/Documents/GitHub/Survival-Meta-Analysis/scripts/DataProcessingFunctions.R')
+source('~/Documents/GitHub/Survival-Meta-Analysis/functions/DataProcessingFunctions.R')
 outputFilePath<-'~/Documents/Thesis/Results/'
 # Unique treatment
 treatments<-unique(meta.df$Treatments)
@@ -14,7 +15,7 @@ treatments<-unique(meta.df$Treatments)
 treatment.labels<-gsub('_',' + ',treatments)
 treatment.labels<-gsub('anti','anti-',treatment.labels)
 # Determine which dependent vars to study
-var.y<-'OS_HR'
+var.y<-'PFS_HR'
 if(var.y=='OS_HR'){
   # For OS HRs:
   meta.df$y<-meta.df$OS_HR
@@ -93,6 +94,23 @@ est.adj.df[dfIndx,]
 mean(est.adj.df$Diff.Perc)
 write.xlsx(est.adj.df,file=paste(outputFilePath,'Clinical_',var.y,'_PublicationBiasAdjusted_EfficacyEst.xlsx',sep=''))
 
+# P-curve analysis
+library(dmetar)
+treatments<-c('antiCTLA4','antiPD1','antiPDL1','antiCTLA4_antiPD1','antiCTLA4_antiPDL1',
+              'antiPD1_Chemotherapy','antiCTLA_Chemotherapy','antiPDL1_Chemotherapy')
+pcurve.df<-data.frame('TE'=log(meta.df$y),'seTE'=meta.df$sigma,'studlab'=1:dim(meta.df)[1],
+                      'Treatment'=meta.df$Treatments)
+
+pcurve.df<-pcurve.df[pcurve.df$Treatment%in%treatments,]
+pcurve.list<-list()
+pcurve(pcurve.df)
+#for(i in 1:length(treatments)){
+  #sub.df<-pcurve.df[is.element(pcurve.df$Treatment,treatments[i]),]
+  #pcurve.list[[i]]<-pcurve(sub.df)
+ # ggsave(paste(outputFilePath,'pcurve_', treatments[i],'.png',sep=''),device = 'png', width = 10, height=8, dpi=300,bg='white')
+  #names(pcurve.list[i])<-treatments[i]
+#}
+
 # Result 2 Heterogeneity
 # 2.1: identification of heterogeneity-inducing experimental variables
 # Proposed experimental vars:
@@ -134,67 +152,9 @@ est.adj.df[dfIndx,]
 mean(est.adj.df$Diff.Perc)
 write.xlsx(est.adj.df,file=paste(outputFilePath,'Clinical_',var.y,'_HeterogeneityAdjusted_EfficacyEst.xlsx',sep=''))
 
-## Result 3.3: Running trim-and-fill analyses again accounting for heterogeneity
-h0.sub<-list()
-listIndx<-1
-factor.var<-'CANCER' # Make sure it is a factor variable in the data frame
-meta.df[,factor.var]<-factor(meta.df[,factor.var])
-h0.form<-data.frame(t(c(NA,NA)))
-names(h0.form)<-c(factor.var,'Treatment')
-# Fit model for each subset of data partitioned according to treatment
-for(i in 1:length(treatments)){
-  sub.df<-subset(meta.df,(meta.df$Treatments %in% treatments[i]))
-  cellLines<-summary(sub.df[,factor.var])>2
-  cellLines<-names(cellLines)[cellLines]
-  sub.df<-subset(sub.df,sub.df[,factor.var] %in% cellLines)
-  sub.df[,factor.var]<-factor(sub.df[,factor.var])
-  sub.df[,factor.var]<-droplevels(sub.df[,factor.var])
-  if(dim(sub.df)[1]>0)
-    for(j in 1:length(cellLines)){
-      sub.df.j<-subset(sub.df,sub.df[,factor.var] %in% cellLines[j])
-      m0.i<-rma(log(y), sei=sigma, slab=STUDY_ID,
-                data=sub.df.j)
-      h0.sub[[listIndx]]<-m0.i
-      h0.form[listIndx,factor.var]<-cellLines[j]
-      h0.form[listIndx,'Treatment']<-treatments[i]
-      listIndx<-listIndx+1
-    }
-  
-}
-h0.sub.tf<-list()
-# Run trim-fill in each submodel
-for(i in 1:length(h0.sub)){
-  try(tf.mi<-trimfill(h0.sub[[i]],'right'))
-  h0.sub.tf[[i]]<-tf.mi
-}
-h0.df<-getTFdf(h0.sub[[1]],h0.sub.tf[[1]])
-h0.df$Treatment<-h0.form[1,'Treatment']
-h0.df[,factor.var]<-h0.form[1,factor.var]
-# Obtain df with omitted points and adjusted estiamtes for each treatment and concatanate them into 1 df
-for(i in 2:length(h0.sub.tf)){
-  df<-getTFdf(h0.sub[[i]],h0.sub.tf[[i]])
-  df$Treatment<-h0.form[i,'Treatment']
-  df[,factor.var]<-h0.form[i,factor.var]
-  h0.df<-rbind(h0.df,df)
-}
-h0.df$Treatment<-factor(h0.df$Treatment,levels=treatments,labels=treatment.labels,ordered = T)
-h0.df[,factor.var]<-factor(h0.df[,factor.var])
-h0.df$Treatment<-droplevels(h0.df$Treatment)
-# Plot and save funnel plots for each treatment
-h0.funnel.list<-list()
-for(i in (unique(h0.df$Treatment))){
-  h0.subset<-subset(h0.df,h0.df$Treatment %in% i)
-  plot.new()
-  (h0.funnel.list[[i]]<-plotTFbyCell(h0.subset,factor.var))
-  h0.funnel.list[[i]]<-h0.funnel.list[[i]]+title(main=paste('Trim-and-fill analysis for',y.legend,sep=' ')) +
-    xlab(x.lab.legend) + ylab(y.lab.legend)
-  ggsave(h0.funnel.list[[i]], file=paste(outputFilePath,'Clinical_TrimFill_', factor.var,'_', var.y, '_', i, '.png',sep=''),
-         width = 10, height=8, dpi=300,bg='white')
-}
-
 # Result 4 - Model selection
 ## Model with treatments only
-clinical.m1<-rma(log(y),sei=sigma,mods=~Treatments -1 ,data=meta.df)
+clinical.m1<-rma(log(y),sei=sigma,mods=~Treatments-1 ,data=meta.df)
 clinical.p1<-data.frame(predict(clinical.m1,newmods=diag(x=1,nrow=length(clinical.m1$beta))))
 clinical.p1$Treatments<-sub('Treatments','',(row.names(clinical.m1$beta)))
 clinical.p1
@@ -255,7 +215,7 @@ sum(clinical.p4$ci.ub<0) #6 are significant in OS_HRs ; 4 are significant in PFS
 AICs<-c(AIC(clinical.m1),AIC(clinical.m2),AIC(clinical.m3),AIC(clinical.m4))
 I2<-c(clinical.m1$I2,clinical.m2$I2,clinical.m3$I2,clinical.m4$I2)
 cbind(AICs,I2)
-clinical.m0<-clinical.m4 # For OS_HR, m1 minimizes AIC, while m4 minimizes I2; For PFS_HR, m4 minimizes AIC and I^2
+clinical.m0<-clinical.m1 # For OS_HR, m1 minimizes AIC, while m4 minimizes I2; For PFS_HR, m4 minimizes AIC and I^2
 # However for both variables, the null model is chosen to compare against preclinical estiamtes
 # Obtain estimates for chosen model
 estimate.adj<-clinical.m0$beta[1:length(treatments)]
@@ -272,11 +232,11 @@ est.adj.df<-data.frame('Original Estimate'=exp(clinical.m1$beta[1:length(treatme
                        'Model'=paste(as.character(clinical.m0$formula.mods),collapse=''),
                        'N'=N.studies)
 est.adj.df
-write.xlsx(est.adj.df,file=paste(outputFilePath,'Clinical_',var.y,'_MASK_adjusted_Estimates.xlsx'))
+write.xlsx(est.adj.df,file=paste(outputFilePath,'Clinical_',var.y,'Cancer_MASK_adjusted_Estimates.xlsx'))
 
 ## Result 5: Fit model to all data for comparison to preclinical estimates
 clinical.m0<-clinical.m1
-clinical.m1<-clinical.m2
+clinical.m1<-clinical.m1
 
 # Leave-one-out CV
 cancerType<-summary(factor(meta.df$CANCER))
@@ -292,6 +252,10 @@ for(i in 1:k){
   pred.i<-predict(model.i,newmods=newmods.i)
   pred.df[i,]<-c('Study'=meta.df[i,"STUDY_ID"],'Treatments'=meta.df[i,'Treatments'],'Cancer'=meta.df[i,'CANCER'],y=meta.df[i,'y'],'Prediction'=pred.i$pred)
 }
+pred.df$y<-as.numeric(pred.df$y)
+pred.df$Prediction<-as.numeric(pred.df$Prediction)
+((mean((log(pred.df$y)-pred.df$Prediction)^2)))
+(crossprod(log(pred.df$y)-pred.df$Prediction))/(dim(pred.df)[1])
 
 ## Save chosen model
 save(clinical.m0,file=paste(outputFilePath,var.y,'_','clinical.m0.RData',sep=''))

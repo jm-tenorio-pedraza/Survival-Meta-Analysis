@@ -1,4 +1,5 @@
 rm(list=ls())
+set.seed(123)
 load('~/Documents/GitHub/Survival-Meta-Analysis/output/PreclinicalSubset.RData')
 source('~/Documents/GitHub/Survival-Meta-Analysis/functions/DataProcessingFunctions.R')
 library(ggplot2)
@@ -8,7 +9,7 @@ outputFilePath<-'~/Documents/Thesis/Results/'
 plotTreatments<-c('antiCTLA4','antiPD1','antiPDL1','antiCTLA4_antiPD1','antiCTLA4_antiPDL1',
                   'antiCTLA4_Chemotherapy','antiPD1_Chemotherapy','antiPDL1_Chemotherapy')
 ## Workflow for analysis of HRs and MRs
-meta.df<-HRsubset.mAb
+meta.df<-HRsubset.mAb[HRsubset.mAb$NR==0,]
 # Unique treatments
 treatments<-unique(meta.df$Treatments)
 # Change the treatments to a factor
@@ -49,26 +50,27 @@ m0.modelrep
 ## M0: fit mle models to treatment-based data subsets
 m0.sub<-list()
 m0.form<-list()
-for(i in 1:length(treatments)){
-  sub.df<-meta.df[is.element(meta.df$Treatments,treatments[i]),]
+HRsubset.df<-HRsubset.mAb[HRsubset.mAb$Treatments%in%plotTreatments,]
+for(i in 1:length(plotTreatments)){
+  sub.df<-meta.df[is.element(meta.df$Treatments,plotTreatments[i]),]
   m0.i<-rma(log(y), sei=sigma, slab=Study,
             data=sub.df)
   m0.sub[[i]]<-m0.i
-  m0.form[[i]]<-paste(treatments[i],'1',sep=' ~ ')
+  m0.form[[i]]<-paste(plotTreatments[i],'1',sep=' ~ ')
 }
 # Trim and fill analysis of M0 models,treatmented-based submodels
 # Run trim-and-fill models for each subset of data
 m0.sub.tf<-list()
-for(i in 1:length(treatments)){
+for(i in 1:length(plotTreatments)){
   try(tf.mi<-trimfill(m0.sub[[i]],'right'))
   m0.sub.tf[[i]]<-tf.mi
 }
 # Extract the omitted points, adjusted and original estimates for each treatment
 m0.df<-getTFdf(m0.sub[[1]],m0.sub.tf[[1]])
-m0.df$Treatment<-treatments[1]
+m0.df$Treatment<-plotTreatments[1]
 for(i in 2:length(m0.sub.tf)){
   df<-getTFdf(m0.sub[[i]],m0.sub.tf[[i]])
-  df$Treatment<-treatments[i]
+  df$Treatment<-plotTreatments[i]
   m0.df<-rbind(m0.df,df)
 }
 m0.df$Fill.in<-factor(m0.df$Fill.in)
@@ -93,7 +95,7 @@ m0.funnel.sub<-m0.funnel.sub + labs(title=paste('Trim-and-fill analysis for ',y.
   xlab(x.lab.legend) + ylab(
     y.lab.legend)
 m0.funnel.sub 
-ggsave(m0.funnel.sub, file=paste(outputFilePath,'Preclinical_TrimFill_Subset_m0_', var.y,'.png',sep=''),
+ggsave(m0.funnel.sub, file=paste(outputFilePath,'Preclinical_TrimFill_Subset_m0_', var.y,'.tiff',sep=''),
        width = 10, height=8, dpi=300,bg='white')
 # Number of omitted studies
 k0<-sapply(m0.sub.tf,function(x) x$k0)
@@ -105,7 +107,7 @@ ci.lb.adjusted<-sapply(m0.sub.tf,function(x)x$ci.lb)
 ci.ub.adjusted<-sapply(m0.sub.tf,function(x)x$ci.ub)
 N.studies<-sapply(m0.sub.tf,function(x)x$k)
 est.adj.df<-data.frame('Original Estimate'=estimate.unadj,'Adjusted Estimate'=estimate.adj,'LB'=ci.lb.adjusted,'UB'=ci.ub.adjusted,
-                       'Treatment' = treatments,'Model'='Treatment subset ~ 1', 'N'=N.studies,'k0'=k0)
+                       'Treatment' = plotTreatments,'Model'='Treatment subset ~ 1', 'N'=N.studies,'k0'=k0)
 est.adj.df
 write.xlsx(est.adj.df,file=paste(outputFilePath,'Preclinical_',var.y,'_PublicationBiasAdjusted_EfficacyEst.xlsx',sep=''))
 # Average overestimation of treatment effect due to publication bias
@@ -114,15 +116,25 @@ dfIndx<-sort(est.adj.df$Diff.Perc,decreasing=F,index.return=T)$ix
 est.adj.df[dfIndx,]
 mean(est.adj.df$Diff.Perc)
 
-# Relation between number of ommited studies and magnitude of difference between adj. and original estimates
-with(est.adj.df,plot(k0,-Diff.Perc))
-abline(a=.2,b=0,h=.2)
+# P-value-analysis
+library(dmetar)
+treatments<-c('antiCTLA4','antiPD1','antiPDL1','antiCTLA4_antiPD1','antiCTLA4_antiPDL1',
+              'antiPD1_Chemotherapy')
+pcurve.df<-data.frame('TE'=log(meta.df$y),'seTE'=meta.df$sigma,'studlab'=1:dim(meta.df)[1],
+                      'Treatment'=meta.df$Treatments,'pvalue'=meta.df$p_value)
 
-# Relation between number of studies and magnitude of difference: Larger N non-linear association with lower difference for above-average deviations
-with(est.adj.df,plot(N-k0,(-Diff.Perc)))
-abline(a=.2,b=0,h=.2)
+pcurve.df<-pcurve.df[pcurve.df$Treatment%in%treatments,]
+pcurve.list<-list()
+pcurve(pcurve.df)
+#for(i in 1:length(treatments)){
+ # sub.df<-pcurve.df[is.element(pcurve.df$Treatment,treatments[i]),]
+ # pcurve.list[[i]]<-pcurve(sub.df)
+ # ggsave(paste(outputFilePath,'pcurve_', treatments[i],'.png',sep=''),device = 'png', width = 10, height=8, dpi=300,bg='white')
+ # names(pcurve.list[i])<-treatments[i]
+#}
 
 # Result 3: Heterogeneity
+preclinical.m0<-rma(log(y),sei=sigma, mods=~Treatments, data=meta.df)
 # 3.1: identification of heterogeneity-inducing experimental variables
 # Proposed experimental vars:
 model.terms<- c('CELL_FAMILY','SEX_1_female','T0_cells','BASELINE_absdiff','DOSE',
@@ -132,9 +144,11 @@ h0<-list()
 h0.m.form<-list()
 for(i in 1:length(model.terms)){
   formula.mi<-as.formula(paste('~Treatments',model.terms[i],sep='+'))
+  #formula.mi<-as.formula(paste('~',model.terms[i],sep=''))
   mi<-rma(log(y),sei=sigma,mods=formula.mi,data=meta.df)
   h0[[i]]<-mi
   h0.m.form[[i]]<-paste('~Treatments',model.terms[i],sep=' + ')
+  #h0.m.form[[i]]<-paste('~',model.terms[i],sep='')
 }
 h0.Models.summ<-modelComparison(h0,h0.m.form)
 r2.Indx<-sort(h0.Models.summ$R.2,decreasing=T,index.return=T)$ix
@@ -167,7 +181,7 @@ write.xlsx(est.adj.df,file=paste(outputFilePath,'Preclinical_',var.y,'_Heterogen
 ## Result 3.3: Running trim-and-fill analyses again accounting for heterogeneity
 h0.sub<-list()
 listIndx<-1
-factor.var<-'Study'
+factor.var<-'CELL_FAMILY'
 h0.form<-data.frame(t(c(NA,NA)))
 names(h0.form)<-c(factor.var,'Treatment')
 # Fit model for each subset of data partitioned according to treatment
@@ -229,13 +243,14 @@ newmods<-diag(length(treatments))
 preclinical.p1<-data.frame(predict(preclinical.m1,newmods=newmods))
 preclinical.p1$Treatments<-sub('Treatments','',row.names(preclinical.m1$beta))
 preclinical.p1
-sum(preclinical.p1$pi.ub<0) # 8 treatment predictions considered significant in HRs, 9 in MRs
+sum(preclinical.p1$pi.ub<0)
 
 # Model 2: with treatments and cell lines
 preclinical.m2<-rma(log(y),sei=sigma,mods=~Treatments+CELL_FAMILY - 1,data=meta.df)
 # identify the treatments and cell effects indexes
 cellIndx<-grep('CELL_FAMILY',row.names(preclinical.m2$beta))
 treatIndx<-grep('Treatments',row.names(preclinical.m2$beta))
+anova(preclinical.m1,preclinical.m2)
 
 # Predictions for treatments with the cell line with the most positive effect
 medianmods.mat<-matrix(rep(0,length(cellIndx)*length(treatments)),nrow=length(treatments))
@@ -243,7 +258,7 @@ newmods.mat<-cbind(newmods,medianmods.mat)
 preclinical.p2<-data.frame(predict(preclinical.m2,newmods=newmods.mat))
 preclinical.p2$Treatments<-sub('Treatments','',row.names(preclinical.m2$beta)[1:length(treatments)])
 preclinical.p2
-sum(preclinical.p2$pi.ub<0) # 33 treatments declared significant when accounting for heterogeneity and cell line-effects in HRs,6 in MRs
+sum(preclinical.p2$pi.ub<0) 
 
 # Visualizing predictions
 ggplot(preclinical.p2,aes(y=Treatments,x=exp(pred),xmin=exp(pi.lb),xmax=exp(pi.ub)))+
@@ -258,26 +273,23 @@ ggplot(preclinical.p2,aes(y=Treatments,x=exp(pred),xmin=exp(pi.lb),xmax=exp(pi.u
   theme(panel.spacing = unit(1, "lines"))+
   geom_vline(xintercept=1, color="black", linetype="dashed", alpha=.5)
 
-# Model 3: CELL + INSTITUTE_ID
-preclinical.m3<-rma(log(y),sei=sigma,mods=~Treatments + CELL_FAMILY + INSTITUTE_ID- 1,data=meta.df)
-anova(preclinical.m3,btt='INSTITUTE_ID') # Wald-type test to determine whether factor is significant
+# Model 3: Study
+preclinical.m3<-rma(log(y),sei=sigma,mods=~Treatments + Study- 1,data=meta.df)
+anova(preclinical.m3,btt='Study') # Wald-type test to determine whether factor is significant
 
 treatIndx<-grep('Treatments',row.names(preclinical.m3$beta))
-cellIndx<-grep('CELL_FAMILY',row.names(preclinical.m3$beta))
-instIndx<-grep('INSTITUTE_ID',row.names(preclinical.m3$beta))
+instIndx<-grep('Study',row.names(preclinical.m3$beta))
 
-# Predictions for treatments wiht the cell line with the most positive effect
-cellmedianmods.mat<-matrix(rep(0,length(treatments)*length(cellIndx)),nrow=length(treatments))
+# Predictions for treatments with the cell line with the most positive effect
 instmedianmods.mat<-matrix(rep(0,length(treatments)*length(instIndx)),nrow=length(treatments))
-newmods.mat<-cbind(newmods,cellmedianmods.mat,instmedianmods.mat)
+newmods.mat<-cbind(newmods,instmedianmods.mat)
 preclinical.p3<-data.frame(predict(preclinical.m3,newmods=newmods.mat))
 preclinical.p3$Treatments<-sub('Treatments','',row.names(preclinical.m3$beta)[1:length(treatments)])
 preclinical.p3
 sum(preclinical.p3$pi.ub<0) # None are considered significant, higher uncertainty and heterogeneity in HRs. None are considered significant in MRs
 
-# Model 4: CELL_FAMILY + BASELINE_absdiff
-preclinical.m4<-rma(log(y),sei=sigma,mods=~Treatments + CELL_FAMILY + BASELINE_absdiff-1,data=meta.df)
-anova(preclinical.m4,btt='BASELINE_absdiff') # not significant
+# Model 4: CELL_FAMILY + Study
+preclinical.m4<-rma(log(y),sei=sigma,mods=~Treatments + CELL_FAMILY + Study-1,data=meta.df)
 
 # Model 5: CANCER_TYPE 
 preclinical.m5<-rma(log(y),sei=sigma,mods=~Treatments + CANCER_TYPE -1,data=meta.df)
@@ -286,7 +298,7 @@ preclinical.m5<-rma(log(y),sei=sigma,mods=~Treatments + CANCER_TYPE -1,data=meta
 AICs<-c(AIC(preclinical.m1),AIC(preclinical.m2),AIC(preclinical.m3),AIC(preclinical.m4),AIC(preclinical.m5))
 I2<-c(preclinical.m1$I2,preclinical.m2$I2,preclinical.m3$I2,preclinical.m4$I2,preclinical.m5$I2)
 cbind(AICs,I2) #For HRs m3 minimizes AIC and I2;  For MRs, m2 minimizes AIC and has relatively low I2
-preclinical.m0<-preclinical.m2
+preclinical.m0<-preclinical.m1
 # Obtain estimates for chosen model
 estimate.adj<-preclinical.m0$beta[1:length(treatments)]
 ci.lb.adjusted<-preclinical.m0$ci.lb[1:length(treatments)]
@@ -308,6 +320,7 @@ dfIndx<-sort(est.adj.df$Diff.Perc,decreasing=F,index.return=T)$ix
 est.adj.df[dfIndx,]
 mean(est.adj.df$Diff.Perc)
 write.xlsx(est.adj.df,file=paste(outputFilePath,'Preclinical_',var.y,'_CELL_INSTITUTE_adjusted_Estimates.xlsx'))
+
 # Set m0 to the best model
 preclinical.m0<-preclinical.m2 # m2 for MR and m3 for HR
 ## Match cell line to cancer_type
@@ -326,6 +339,6 @@ preclinical.m0<-preclinical.m1
 save.image(file=paste(outputFilePath,'Preclinical_',var.y,'_workflowOutput.RData',sep=''))
 save(preclinical.m0,file=paste(outputFilePath,var.y,'_','preclinical.m0.RData',sep=''))
 save(preclinical.m1,file=paste(outputFilePath,var.y,'_','preclinical.m1.RData',sep=''))
-write.table(cancer.mat,file=paste(outputFilePath,'Preclinical_',var.y,'CELL_predMat.csv'),sep='')
+write.table(cancer.mat,file=paste(outputFilePath,'Preclinical_',var.y,'_CELL_predMat.csv',sep=''))
 save(h0.1,file=paste(outputFilePath,var.y,'_','simModel.RData',sep=''))
 
