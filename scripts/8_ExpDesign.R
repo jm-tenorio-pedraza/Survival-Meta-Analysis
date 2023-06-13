@@ -1,17 +1,17 @@
 rm(list=ls())
+set.seed(123)
 ## Simulation for experiment optimization
 library(reshape2)
 library(parallel)
 library(metafor)
 library(ggplot2)
 library(openxlsx)
-library(future.apply)
-outputFilePath<-'~/Documents/Github/Survival-Meta-Analysis/output/'
+outputFilePath<-'~/Documents/Thesis/Results/'
 
 # Load model to simulate
-load(file=paste(outputFilePath,'MR','_','simModel.RData',sep=''))
+load(file=paste(outputFilePath,'HR','_','simModel.RData',sep=''))
 
-sim.model<-h0.1
+sim.model<-preclinical.m4
 # Extract heterogeneity
 tau<-sim.model$tau2
 # Extract variability
@@ -29,10 +29,10 @@ hist(cell.est,breaks=10)
 qqnorm(cell.est)
 qqline(cell.est)
 # Identify lab-related coefs
-lab_indx<-grep('LAB_ID.*',row.names(beta.est))
+lab_indx<-grep('Study.*',row.names(beta.est))
 lab.est<-beta.est[lab_indx,1]
 lab.psi<-sd(lab.est)
-names(lab.est)<-sub('LAB_ID','',names(lab.est))
+names(lab.est)<-sub('Study','',names(lab.est))
 n_lab<-length(lab.est)
 hist(lab.est,breaks=10)
 qqnorm(lab.est)
@@ -51,10 +51,11 @@ n_treat<-length(treat.est)
 # Number of artificial datasets
 N_samples<-2000
 N_cell<-6
-N_lab<-10
+N_lab<-1
 N_replicates<-3
 # Number of cores
 numCores<-detectCores()
+numCores
 # Generate samples for each exp design
 MSE.exp.design<-list()
 HET.exp.design<-list()
@@ -75,14 +76,6 @@ default.fx<-function(){
                      'SE.Est'=NaN,'MSE'=NaN,'Power'=NaN,'Tau'=NaN,'I2'=NaN)
   return(output)
 }
-
-#Determine which parallelization function to use based on the OS
-if(as.character(Sys.info()['sysname'])==("Windows")){
-  par.func<- function(x.func,y.list)future_mapply(x.func,y.list,SIMPLIFY=F)
-  plan(multicore)
-} else{
-  par.func<- function(x.func,y.list)mclapply(x.func,y.list,mc.cores = numCores)
-  }
 
 for(i in 1:N_cell){
   for(j in 1:N_lab){
@@ -155,7 +148,7 @@ for(i in 1:N_cell){
                     })
       return(out)
     }
-    rma.i.j<-par.func(fitModel,hr.list)
+    rma.i.j<-mclapply(hr.list,fitModel,mc.cores = numCores)
     # Extract treatment effects
     beta.ij<-t(sapply(rma.i.j,function(x)x$Treatment.Est))
     #Extract SE of treatment effects
@@ -183,11 +176,9 @@ for(i in 1:N_cell){
 
 # Power
 power.est<-sapply(MSE.exp.design,function(x)x$Power)
-colnames(power.est)
 power.3d<-power.est
 # Tall-version
 power.est<-melt(power.est)
-
 ## MSE
 MSE.est<-sapply(MSE.exp.design,function(x)x$MSE)
 MSE.3d<-MSE.est
@@ -207,7 +198,7 @@ MSE.est$Treatment<-factor(MSE.est$Treatment,levels=treatments,labels=c('anti-CTL
                                                                    'anti-CTLA-4 + anti-PD-L1','anti-CTLA-4 + Chemotherapy',
                                                                    'anti-PD-1 + Chemotherapy', 'anti-PD-L1 + Chemotherapy'),ordered = T)
 
-write.xlsx(MSE.est,file=paste(outputFilePath,'MSE.est.summary.xlsx',sep = ''))
+write.xlsx(MSE.est,file='/Users/migueltenorio/Documents/Thesis/Results/MSE.est.summary.xlsx')
 # MSE.est.xlsx<-read.xlsx('/Users/migueltenorio/Documents/Thesis/Results/MSE.est.summary.xlsx')
 # MSE.est<-rbind(MSE.est.xlsx,MSE.est)
 # 3D version of MSE
@@ -225,7 +216,7 @@ names(MSE.3d)<-c('value','CELL','LAB','variable')
 MSE.3d<-acast(MSE.3d,CELL~LAB)
 #MSE.3d.xlsx<-read.xlsx('/Users/migueltenorio/Documents/Thesis/Results/MSE.3d.xlsx')
 #MSE.3d<-cbind(MSE.3d.xlsx,MSE.3d)
-write.xlsx(MSE.3d,file=paste(outputFilePath,'MSE.3d.xlsx',sep = ''))
+write.xlsx(MSE.3d,file='/Users/migueltenorio/Documents/Thesis/Results/MSE.3d.xlsx')
 
 # 3D version of Power
 power.3d<-colMeans(power.3d,na.rm=T)
@@ -237,12 +228,10 @@ names(power.3d)<-c('value','CELL','LAB','variable')
 
 power.3d<-acast(power.3d,CELL~LAB)
 
-Power.3d.xlsx<-read.xlsx('/Users/migueltenorio/Documents/GitHub/Survival-Meta-Analysis/output/Power.3d.xlsx',sheet=1)
+# Power.3d.xlsx<-read.xlsx('/Users/migueltenorio/Documents/Thesis/Results/Power.3d.xlsx')
 # power.3d<-cbind(Power.3d.xlsx,power.3d)
-write.xlsx(power.3d,file=paste(outputFilePath,'Power.3d.xlsx',sep = ''))
+write.xlsx(power.3d,file='/Users/migueltenorio/Documents/Thesis/Results/Power.3d.xlsx')
 
-# load file of MSE and power
-MSE.est<-read.xlsx('/Users/migueltenorio/Documents/GitHub/Survival-Meta-Analysis/output/MSE.est.summary.xlsx',sheet=1)
 ## 2-D plotof MSE
 MSE.ggplot<-ggplot(MSE.est,aes(CELL,MSE,color=LAB))+
   geom_point()
@@ -259,10 +248,10 @@ MSE.ggplot<-MSE.ggplot+labs(color='Treatment',  y='MSE',x="Number of labs",
   scale_color_discrete()+
   theme(plot.title=element_text(size=16,face="bold",family="Helvetica"),
         axis.title=element_text(size=12,face="bold",family="Helvetica"))+
-  scale_x_continuous(limits=c(0,10))
+  scale_x_continuous(limits=c(0,11))
 MSE.ggplot
-ggsave(MSE.ggplot, file=paste(outputFilePath,'MSE_CELL_LAB.png',sep=''),
-       width = 10, height=8, dpi=300,bg='white')
+ggsave(MSE.ggplot, file=paste('/Users/migueltenorio/Documents/Thesis/Results/MSE_CELL_LAB.png',sep=''),
+       width = 10, height=8, dpi=300)
 ## 2-D plot of Power
 # Sublots for different cells
 Power.ggplot<-ggplot(MSE.est,aes(LAB,Power,color=Treatment))+
@@ -271,15 +260,15 @@ Power.ggplot<-ggplot(MSE.est,aes(LAB,Power,color=Treatment))+
   facet_wrap(~CELL)
 Power.ggplot<-Power.ggplot+labs(color='Treatment',  y='Power',x="Number of labs",
                                 title='Power of the experimental designs for ICB treatments',
-                                subtitle='Experimental design: 1-6 cell lines + 1-6 labs')+
+                                subtitle='Experimental design: 1-6 cell lines + 1-10 labs')+
   theme_minimal()+
   scale_color_discrete()+
   theme(plot.title=element_text(size=16,face="bold",family="Helvetica"),
         axis.title=element_text(size=12,face="bold",family="Helvetica"))+
-  scale_x_continuous(limits=c(0,10))
+  scale_x_continuous(limits=c(0,11))
 Power.ggplot
-ggsave(Power.ggplot, file=paste(outputFilePath,'Power_CELL_LAB.png',sep=''),
-       width = 10, height=8, dpi=300,bg='white')
+ggsave(Power.ggplot, file=paste('/Users/migueltenorio/Documents/Thesis/Results/Power_CELL_LAB.png',sep=''),
+       width = 10, height=8, dpi=300)
 MSE.est$CELL_factor<-as.factor(MSE.est$CELL)
 # Plot power and MSE
 MSE.Power.ggplot<-ggplot(MSE.est,aes(x=LAB,color=CELL_factor))+
@@ -298,7 +287,7 @@ MSE.Power.ggplot<-MSE.Power.ggplot+labs(
   subtitle='Experimental design: 1-6 cell lines + 1-10 labs')
 
 MSE.Power.ggplot
-ggsave(MSE.Power.ggplot, file=paste(outputFilePath,'MSE_Power_CELL_LAB.png',sep=''),
+ggsave(MSE.Power.ggplot, file=paste('/Users/migueltenorio/Documents/Thesis/Results/MSE_Power_CELL_LAB.png',sep=''),
        width = 10, height=8, dpi=300)
 
 
@@ -330,5 +319,6 @@ Power.plotly<-Power.plotly %>% plotly::layout(title='Average Power over all trea
                                                          xaxis=xax,
                                                          zaxis=list(title='Power')))
 Power.plotly
-save.image(file=paste(outputFilePath,'ExpDesign.RData',sep = ''))
+save.image(file='~/Documents/GitHub/Survival-Meta-Analysis/output/ExpDesign.RData')
+load('~/Documents/GitHub/Survival-Meta-Analysis/output/ExpDesign.RData')
 

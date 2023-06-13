@@ -16,7 +16,7 @@ treatments<-unique(meta.df$Treatments)
 treatment.labels<-gsub('_',' + ',treatments)
 treatment.labels<-gsub('anti','anti-',treatment.labels)
 # Determine which dependent vars to study
-var.y<-'HR'
+var.y<-'MR'
 if(var.y=='HR'){
   # For HRs:
   meta.df$y<-meta.df$HR
@@ -335,10 +335,13 @@ cancer.mat<-cancer.mat/rowSums(cancer.mat)
 # Assign output preclinical models
 preclinical.m1<-preclinical.m2
 preclinical.m0<-preclinical.m1
+preclinical.m2<-
 # Save outputs
 save.image(file=paste(outputFilePath,'Preclinical_',var.y,'_workflowOutput.RData',sep=''))
 save(preclinical.m0,file=paste(outputFilePath,var.y,'_','preclinical.m0.RData',sep=''))
 save(preclinical.m1,file=paste(outputFilePath,var.y,'_','preclinical.m1.RData',sep=''))
+save(preclinical.m4,file=paste(outputFilePath,var.y,'_','simModel.RData',sep=''))
+
 write.table(cancer.mat,file=paste(outputFilePath,'Preclinical_',var.y,'_CELL_predMat.csv',sep=''))
 save(h0.1,file=paste(outputFilePath,var.y,'_','simModel.RData',sep=''))
 
