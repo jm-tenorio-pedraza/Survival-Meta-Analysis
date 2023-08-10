@@ -7,9 +7,18 @@ library(metafor)
 library(ggplot2)
 library(openxlsx)
 outputFilePath<-'~/Documents/Thesis/Results/'
-
+outputFilePath<-'~/GitHub/Survival-Meta-Analysis/output/'
+var.y<-'HR'
+if(var.y=='HR'){
+  y.legend<-'log-Hazard ratios'
+  x.lab.legend<-'log(HR)'
+  y.lab.legend<-'Precision (1/SE)'
+}else
+{ y.legend<-'log-Median survival ratios'
+x.lab.legend<-'log(MR)'
+y.lab.legend<-'Precision (N)'}
 # Load model to simulate
-load(file=paste(outputFilePath,'HR','_','simModel.RData',sep=''))
+load(file=paste(outputFilePath,var.y,'_simModel.RData',sep=''))
 
 sim.model<-preclinical.m4
 # Extract heterogeneity
@@ -51,7 +60,7 @@ n_treat<-length(treat.est)
 # Number of artificial datasets
 N_samples<-2000
 N_cell<-6
-N_lab<-1
+N_lab<-10
 N_replicates<-3
 # Number of cores
 numCores<-detectCores()
@@ -130,16 +139,16 @@ for(i in 1:N_cell){
     if(i==1 & j!=1){model.form<-as.formula('~Treatment +LAB -1')}
     if(i!=1 & j==1){model.form<-as.formula('~Treatment + CELL -1')}
     if(i!=1 & j!=1){model.form<-as.formula('~Treatment +LAB + CELL-1')}
-    fitModel<-function(x){
+    fitModel<-function(x,treat.names){
       out<-tryCatch(fx(x,model.form), 
                     error=function(cond){
                       
-                      out<-data.frame('Treatments'=names(treat.est),'Treatment.Est'=NaN,
+                      out<-data.frame('Treatments'=treat.names,'Treatment.Est'=NaN,
                                       'SE.Est'=NaN,'MSE'=NaN,'Power'=NaN)
                       return(out)
                     },
                     warning=function(cond){
-                      out<-data.frame('Treatments'=names(treat.est),'Treatment.Est'=NaN,
+                      out<-data.frame('Treatments'=treat.names,'Treatment.Est'=NaN,
                                       'SE.Est'=NaN,'MSE'=NaN,'Power'=NaN)
                       return(out)
                     },
@@ -148,7 +157,15 @@ for(i in 1:N_cell){
                     })
       return(out)
     }
-    rma.i.j<-mclapply(hr.list,fitModel,mc.cores = numCores)
+    # rma.i.j<-mclapply(hr.list,fitModel,mc.cores = numCores) Only useful in mac
+    cl<-makePSOCKcluster(8)
+    setDefaultCluster(cl)
+    adder<-function(x) fitModel(x,names(treat.est))
+    clusterExport(NULL,c('adder','fitModel','fx','treat.est','model.form'))
+    clusterEvalQ(NULL,library(metafor))
+    clusterEvalQ(NULL,library(base))
+    rma.i.j<-parLapply(NULL,hr.list,adder) # Only useful in windows
+    stopCluster(cl)
     # Extract treatment effects
     beta.ij<-t(sapply(rma.i.j,function(x)x$Treatment.Est))
     #Extract SE of treatment effects
@@ -198,8 +215,9 @@ MSE.est$Treatment<-factor(MSE.est$Treatment,levels=treatments,labels=c('anti-CTL
                                                                    'anti-CTLA-4 + anti-PD-L1','anti-CTLA-4 + Chemotherapy',
                                                                    'anti-PD-1 + Chemotherapy', 'anti-PD-L1 + Chemotherapy'),ordered = T)
 
-write.xlsx(MSE.est,file='/Users/migueltenorio/Documents/Thesis/Results/MSE.est.summary.xlsx')
-# MSE.est.xlsx<-read.xlsx('/Users/migueltenorio/Documents/Thesis/Results/MSE.est.summary.xlsx')
+write.xlsx(MSE.est,file=paste(outputFilePath,var.y,'_MSE.est.summary.xlsx',sep = ''))
+MSE.est.xlsx<-read.xlsx(paste(outputFilePath,var.y, '_MSE.est.summary.xlsx',sep=''))
+MSE.3d<-MSE.est.xlsx
 # MSE.est<-rbind(MSE.est.xlsx,MSE.est)
 # 3D version of MSE
 MSE.3d<-colMeans(MSE.3d,na.rm=T)
@@ -216,7 +234,7 @@ names(MSE.3d)<-c('value','CELL','LAB','variable')
 MSE.3d<-acast(MSE.3d,CELL~LAB)
 #MSE.3d.xlsx<-read.xlsx('/Users/migueltenorio/Documents/Thesis/Results/MSE.3d.xlsx')
 #MSE.3d<-cbind(MSE.3d.xlsx,MSE.3d)
-write.xlsx(MSE.3d,file='/Users/migueltenorio/Documents/Thesis/Results/MSE.3d.xlsx')
+write.xlsx(MSE.3d,file=paste(outputFilePath,var.y,'_MSE.3d.xlsx',sep=''))
 
 # 3D version of Power
 power.3d<-colMeans(power.3d,na.rm=T)
@@ -230,7 +248,7 @@ power.3d<-acast(power.3d,CELL~LAB)
 
 # Power.3d.xlsx<-read.xlsx('/Users/migueltenorio/Documents/Thesis/Results/Power.3d.xlsx')
 # power.3d<-cbind(Power.3d.xlsx,power.3d)
-write.xlsx(power.3d,file='/Users/migueltenorio/Documents/Thesis/Results/Power.3d.xlsx')
+write.xlsx(power.3d,file=paste(outputFilePath,var.y,'_Power.3d.xlsx'))
 
 ## 2-D plotof MSE
 MSE.ggplot<-ggplot(MSE.est,aes(CELL,MSE,color=LAB))+
@@ -241,34 +259,34 @@ MSE.ggplot<-ggplot(MSE.est,aes(LAB,MSE,color=Treatment))+
   geom_point()+
   geom_line()+
   facet_wrap(~CELL)
-MSE.ggplot<-MSE.ggplot+labs(color='Treatment',  y='MSE',x="Number of labs",
-                            title='Mean squared error of the treatment effects',
-                            subtitle='Experimental design: 1-6 cell lines + 1-10 labs')+
+MSE.ggplot<-MSE.ggplot+labs(color='Treatment',  y='MSE',x="Number of studies",
+                            title=paste('Mean squared error of treatment effects ', '(',var.y,')', sep=''),
+                            subtitle='Experimental design: 1-6 cell lines + 1-10 studies')+
   theme_minimal()+
   scale_color_discrete()+
   theme(plot.title=element_text(size=16,face="bold",family="Helvetica"),
         axis.title=element_text(size=12,face="bold",family="Helvetica"))+
   scale_x_continuous(limits=c(0,11))
 MSE.ggplot
-ggsave(MSE.ggplot, file=paste('/Users/migueltenorio/Documents/Thesis/Results/MSE_CELL_LAB.png',sep=''),
-       width = 10, height=8, dpi=300)
+ggsave(MSE.ggplot, file=paste(outputFilePath, var.y,'_MSE_CELL_LAB.png',sep=''),
+       width = 10, height=8, dpi=300,bg = 'white')
 ## 2-D plot of Power
 # Sublots for different cells
 Power.ggplot<-ggplot(MSE.est,aes(LAB,Power,color=Treatment))+
   geom_point()+
   geom_line()+
   facet_wrap(~CELL)
-Power.ggplot<-Power.ggplot+labs(color='Treatment',  y='Power',x="Number of labs",
-                                title='Power of the experimental designs for ICB treatments',
-                                subtitle='Experimental design: 1-6 cell lines + 1-10 labs')+
+Power.ggplot<-Power.ggplot+labs(color='Treatment',  y='Power',x="Number of studies",
+                                title=paste('Power of the experimental designs for ICB treatments ','(',var.y,')',sep = ''),
+                                subtitle='Experimental design: 1-6 cell lines + 1-10 studies')+
   theme_minimal()+
   scale_color_discrete()+
   theme(plot.title=element_text(size=16,face="bold",family="Helvetica"),
         axis.title=element_text(size=12,face="bold",family="Helvetica"))+
   scale_x_continuous(limits=c(0,11))
 Power.ggplot
-ggsave(Power.ggplot, file=paste('/Users/migueltenorio/Documents/Thesis/Results/Power_CELL_LAB.png',sep=''),
-       width = 10, height=8, dpi=300)
+ggsave(Power.ggplot, file=paste(outputFilePath, var.y, '_Power_CELL_LAB.png',sep=''),
+       width = 10, height=8, dpi=300,bg='white')
 MSE.est$CELL_factor<-as.factor(MSE.est$CELL)
 # Plot power and MSE
 MSE.Power.ggplot<-ggplot(MSE.est,aes(x=LAB,color=CELL_factor))+
@@ -287,8 +305,8 @@ MSE.Power.ggplot<-MSE.Power.ggplot+labs(
   subtitle='Experimental design: 1-6 cell lines + 1-10 labs')
 
 MSE.Power.ggplot
-ggsave(MSE.Power.ggplot, file=paste('/Users/migueltenorio/Documents/Thesis/Results/MSE_Power_CELL_LAB.png',sep=''),
-       width = 10, height=8, dpi=300)
+ggsave(MSE.Power.ggplot, file=paste(outputFilePath,var.y,'_MSE_Power_CELL_LAB.png',sep=''),
+       width = 10, height=8, dpi=300,bg='white')
 
 
 # 3-D plot of MSE
@@ -319,6 +337,6 @@ Power.plotly<-Power.plotly %>% plotly::layout(title='Average Power over all trea
                                                          xaxis=xax,
                                                          zaxis=list(title='Power')))
 Power.plotly
-save.image(file='~/Documents/GitHub/Survival-Meta-Analysis/output/ExpDesign.RData')
-load('~/Documents/GitHub/Survival-Meta-Analysis/output/ExpDesign.RData')
-
+save.image(file=paste(outputFilePath,var.y,'_ExpDesign.RData',sep = ''))
+load(paste(outputFilePath,var.y,'_ExpDesign.RData',sep = ''))
+by(MSE.est$MSE,MSE.est$Treatment,min)

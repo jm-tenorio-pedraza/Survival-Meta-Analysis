@@ -1,11 +1,14 @@
 rm(list=ls())
 set.seed(123)
-load('~/Documents/GitHub/Survival-Meta-Analysis/output/PreclinicalSubset.RData')
-source('~/Documents/GitHub/Survival-Meta-Analysis/functions/DataProcessingFunctions.R')
+#outputFilePath<-'~/Documents/Thesis/Results/'
+outputFilePath<-'~/GitHub/Survival-Meta-Analysis/output/'
+
+load(paste(outputFilePath,'PreclinicalSubset.RData',sep=''))
+source('~/GitHub/Survival-Meta-Analysis/functions/DataProcessingFunctions.R')
+
 library(ggplot2)
 library(openxlsx)
 library(metafor)
-outputFilePath<-'~/Documents/Thesis/Results/'
 plotTreatments<-c('antiCTLA4','antiPD1','antiPDL1','antiCTLA4_antiPD1','antiCTLA4_antiPDL1',
                   'antiCTLA4_Chemotherapy','antiPD1_Chemotherapy','antiPDL1_Chemotherapy')
 ## Workflow for analysis of HRs and MRs
