@@ -1,10 +1,11 @@
 rm(list=ls())
+setwd("~/Documents/GitHub/Survival-Meta-Analysis")
 set.seed(123)
-#outputFilePath<-'~/Documents/Thesis/Results/'
-outputFilePath<-'~/GitHub/Survival-Meta-Analysis/output/'
-
-load(paste(outputFilePath,'PreclinicalSubset.RData',sep=''))
-source('~/GitHub/Survival-Meta-Analysis/functions/DataProcessingFunctions.R')
+setwd("/") # Set working directory where 'output' and 'functions' are present
+outputFilePath<-paste(getwd(),'/output',sep = '')
+# Load data and functions
+HRsubset.mAb<-load(paste(getwd(),'/output/HRsubset.mAb.RData',sep='')) 
+source('functions/DataProcessingFunctions.R')
 
 library(ggplot2)
 library(openxlsx)
@@ -127,14 +128,7 @@ pcurve.df<-data.frame('TE'=log(meta.df$y),'seTE'=meta.df$sigma,'studlab'=1:dim(m
                       'Treatment'=meta.df$Treatments,'pvalue'=meta.df$p_value)
 
 pcurve.df<-pcurve.df[pcurve.df$Treatment%in%treatments,]
-pcurve.list<-list()
 pcurve(pcurve.df)
-#for(i in 1:length(treatments)){
- # sub.df<-pcurve.df[is.element(pcurve.df$Treatment,treatments[i]),]
- # pcurve.list[[i]]<-pcurve(sub.df)
- # ggsave(paste(outputFilePath,'pcurve_', treatments[i],'.png',sep=''),device = 'png', width = 10, height=8, dpi=300,bg='white')
- # names(pcurve.list[i])<-treatments[i]
-#}
 
 # Result 3: Heterogeneity
 preclinical.m0<-rma(log(y),sei=sigma, mods=~Treatments, data=meta.df)
@@ -147,11 +141,9 @@ h0<-list()
 h0.m.form<-list()
 for(i in 1:length(model.terms)){
   formula.mi<-as.formula(paste('~Treatments',model.terms[i],sep='+'))
-  #formula.mi<-as.formula(paste('~',model.terms[i],sep=''))
   mi<-rma(log(y),sei=sigma,mods=formula.mi,data=meta.df)
   h0[[i]]<-mi
   h0.m.form[[i]]<-paste('~Treatments',model.terms[i],sep=' + ')
-  #h0.m.form[[i]]<-paste('~',model.terms[i],sep='')
 }
 h0.Models.summ<-modelComparison(h0,h0.m.form)
 r2.Indx<-sort(h0.Models.summ$R.2,decreasing=T,index.return=T)$ix
@@ -240,13 +232,6 @@ for(i in (unique(h0.df$Treatment))){
 # Result 4 - Model selection
 ## Model 1: with treatments only
 preclinical.m1<-rma(log(y),sei=sigma,mods=~Treatments-1,data=meta.df)
-# Generate prediction matrix
-newmods<-diag(length(treatments))
-# Compute predictions
-preclinical.p1<-data.frame(predict(preclinical.m1,newmods=newmods))
-preclinical.p1$Treatments<-sub('Treatments','',row.names(preclinical.m1$beta))
-preclinical.p1
-sum(preclinical.p1$pi.ub<0)
 
 # Model 2: with treatments and cell lines
 preclinical.m2<-rma(log(y),sei=sigma,mods=~Treatments+CELL_FAMILY - 1,data=meta.df)
@@ -301,7 +286,7 @@ preclinical.m5<-rma(log(y),sei=sigma,mods=~Treatments + CANCER_TYPE -1,data=meta
 AICs<-c(AIC(preclinical.m1),AIC(preclinical.m2),AIC(preclinical.m3),AIC(preclinical.m4),AIC(preclinical.m5))
 I2<-c(preclinical.m1$I2,preclinical.m2$I2,preclinical.m3$I2,preclinical.m4$I2,preclinical.m5$I2)
 cbind(AICs,I2) #For HRs m3 minimizes AIC and I2;  For MRs, m2 minimizes AIC and has relatively low I2
-preclinical.m0<-preclinical.m1
+preclinical.m0<-preclinical.m1 
 # Obtain estimates for chosen model
 estimate.adj<-preclinical.m0$beta[1:length(treatments)]
 ci.lb.adjusted<-preclinical.m0$ci.lb[1:length(treatments)]
@@ -335,10 +320,9 @@ cell.family<-sub('CELL_FAMILY','',row.names(preclinical.m0$beta)[grep('CELL_FAMI
 cancer.mat<-data.frame(t(sapply(cancer.cellLines,function(x)cell.family%in%x))*1,row.names = cancer.type)
 names(cancer.mat)<-cell.family
 cancer.mat<-cancer.mat/rowSums(cancer.mat)
-# Assign output preclinical models
+# Assign output preclinical models for translation
 preclinical.m1<-preclinical.m2
 preclinical.m0<-preclinical.m1
-preclinical.m2<-
 # Save outputs
 save.image(file=paste(outputFilePath,'Preclinical_',var.y,'_workflowOutput.RData',sep=''))
 save(preclinical.m0,file=paste(outputFilePath,var.y,'_','preclinical.m0.RData',sep=''))
@@ -346,5 +330,5 @@ save(preclinical.m1,file=paste(outputFilePath,var.y,'_','preclinical.m1.RData',s
 save(preclinical.m4,file=paste(outputFilePath,var.y,'_','simModel.RData',sep=''))
 
 write.table(cancer.mat,file=paste(outputFilePath,'Preclinical_',var.y,'_CELL_predMat.csv',sep=''))
-save(h0.1,file=paste(outputFilePath,var.y,'_','simModel.RData',sep=''))
+save(h0.1,file=paste(outputFilePath,var.y,'_','simModel.RData',sep='')) # Save chosen model to simulate 
 

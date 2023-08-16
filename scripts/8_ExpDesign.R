@@ -6,9 +6,10 @@ library(parallel)
 library(metafor)
 library(ggplot2)
 library(openxlsx)
-outputFilePath<-'~/Documents/Thesis/Results/'
-outputFilePath<-'~/GitHub/Survival-Meta-Analysis/output/'
-var.y<-'HR'
+setwd('/') # Set working directory
+outputFilePath<-paste(getwd(),'/output',sep='')
+# Choose variable of interest {MR for median survival ratios or HR for hazard ratios}
+var.y<-'MR'
 if(var.y=='HR'){
   y.legend<-'log-Hazard ratios'
   x.lab.legend<-'log(HR)'
@@ -17,10 +18,9 @@ if(var.y=='HR'){
 { y.legend<-'log-Median survival ratios'
 x.lab.legend<-'log(MR)'
 y.lab.legend<-'Precision (N)'}
-# Load model to simulate
-load(file=paste(outputFilePath,var.y,'_simModel.RData',sep=''))
 
-sim.model<-preclinical.m4
+# Load model to simulate
+sim.model<-load(file=paste(outputFilePath,var.y,'_simModel.RData',sep=''))
 # Extract heterogeneity
 tau<-sim.model$tau2
 # Extract variability
@@ -32,20 +32,14 @@ cell_indx<-grep('CELL_FAMILY.*',row.names(beta.est))
 cell.est<-beta.est[cell_indx,1]
 cell.psi<-sd(cell.est)
 names(cell.est)<-sub('CELL_FAMILY','',names(cell.est))
-
 n_cell<-length(cell.est)
-hist(cell.est,breaks=10)
-qqnorm(cell.est)
-qqline(cell.est)
+
 # Identify lab-related coefs
 lab_indx<-grep('Study.*',row.names(beta.est))
 lab.est<-beta.est[lab_indx,1]
 lab.psi<-sd(lab.est)
 names(lab.est)<-sub('Study','',names(lab.est))
 n_lab<-length(lab.est)
-hist(lab.est,breaks=10)
-qqnorm(lab.est)
-qqline(lab.est)
 
 # identify treatment-related coefs
 treat_indx<-grep('Treatments.*',row.names(beta.est))
@@ -63,13 +57,12 @@ N_cell<-6
 N_lab<-10
 N_replicates<-3
 # Number of cores
-numCores<-detectCores()
-numCores
+numCores<-detectCores() #useful only if parallelization is available
 # Generate samples for each exp design
 MSE.exp.design<-list()
 HET.exp.design<-list()
 exp.indx<-1
-fx<-function(x,model.formula){
+fx<-function(x,model.formula){ # Define function that extracts relevant estimates from model
   model.i<-rma(MR,sei=SD,mods=model.formula,data=x)
   beta.ij<-model.i$beta[1:length(treat.est)]
   se.ij<-model.i$se[1:length(treat.est)]
@@ -80,13 +73,13 @@ fx<-function(x,model.formula){
                      'SE.Est'=se.ij,'MSE'=(beta.ij-treat.est)^2,'Power'=1-pval.ij,'Tau'=tau.ij,'I2'=I2.ij)
   return(output)
 }
-default.fx<-function(){
+default.fx<-function(){ # Define function to output a df when models cannot be fitted due to low number of factor levels 
   output<-data.frame('Treatments'=names(treat.est),'Treatment.Est'=NaN,
                      'SE.Est'=NaN,'MSE'=NaN,'Power'=NaN,'Tau'=NaN,'I2'=NaN)
   return(output)
 }
 
-for(i in 1:N_cell){
+for(i in 1:N_cell){ # Loop to simulate data and estimate models
   for(j in 1:N_lab){
     # Sample cell-related effects
     sample_cell<-matrix(rep(matrix(sample(cell.est,N_samples*i,replace=T),nrow=N_samples),j),nrow=N_samples)
@@ -208,7 +201,7 @@ cell_lab_var<-sub('.*- ','',as.character(MSE.est$Design))
 cell_lab_var
 cell<-as.numeric(sub(' Lab: .*','',sub('Cell: ','',cell_lab_var)))
 lab<-as.numeric(sub('Lab: ','',sub('Cell: [0 1 2 3 4 5 6 7 8 9 10]*','',cell_lab_var)))
-MSE.est$CELL<-cell
+MSE.est$CELL<-(cell)
 MSE.est$LAB<-lab
 MSE.est$Power<-power.est$value
 MSE.est$Treatment<-factor(MSE.est$Treatment,levels=treatments,labels=c('anti-CTLA-4','anti-PD-1','anti-PD-L1','anti-CTLA-4 + anti-PD-1',
@@ -216,9 +209,9 @@ MSE.est$Treatment<-factor(MSE.est$Treatment,levels=treatments,labels=c('anti-CTL
                                                                    'anti-PD-1 + Chemotherapy', 'anti-PD-L1 + Chemotherapy'),ordered = T)
 
 write.xlsx(MSE.est,file=paste(outputFilePath,var.y,'_MSE.est.summary.xlsx',sep = ''))
-MSE.est.xlsx<-read.xlsx(paste(outputFilePath,var.y, '_MSE.est.summary.xlsx',sep=''))
-MSE.3d<-MSE.est.xlsx
-# MSE.est<-rbind(MSE.est.xlsx,MSE.est)
+#MSE.est.xlsx<-read.xlsx(paste(outputFilePath,var.y, '_MSE.est.summary.xlsx',sep=''))
+#MSE.3d<-MSE.est.xlsx
+
 # 3D version of MSE
 MSE.3d<-colMeans(MSE.3d,na.rm=T)
 cell_lab_var<-sub('.*- ','',names(MSE.3d))
@@ -232,9 +225,8 @@ MSE.3d$LAB<-lab
 MSE.3d$variable <-'MSE'
 names(MSE.3d)<-c('value','CELL','LAB','variable')
 MSE.3d<-acast(MSE.3d,CELL~LAB)
-#MSE.3d.xlsx<-read.xlsx('/Users/migueltenorio/Documents/Thesis/Results/MSE.3d.xlsx')
-#MSE.3d<-cbind(MSE.3d.xlsx,MSE.3d)
 write.xlsx(MSE.3d,file=paste(outputFilePath,var.y,'_MSE.3d.xlsx',sep=''))
+#MSE.3d.xlsx<-read.xlsx('/Users/migueltenorio/Documents/Thesis/Results/MSE.3d.xlsx')
 
 # 3D version of Power
 power.3d<-colMeans(power.3d,na.rm=T)
@@ -245,10 +237,9 @@ power.3d$variable<-'Power'
 names(power.3d)<-c('value','CELL','LAB','variable')
 
 power.3d<-acast(power.3d,CELL~LAB)
+write.xlsx(power.3d,file=paste(outputFilePath,var.y,'_Power.3d.xlsx'))
 
 # Power.3d.xlsx<-read.xlsx('/Users/migueltenorio/Documents/Thesis/Results/Power.3d.xlsx')
-# power.3d<-cbind(Power.3d.xlsx,power.3d)
-write.xlsx(power.3d,file=paste(outputFilePath,var.y,'_Power.3d.xlsx'))
 
 ## 2-D plotof MSE
 MSE.ggplot<-ggplot(MSE.est,aes(CELL,MSE,color=LAB))+
@@ -256,9 +247,10 @@ MSE.ggplot<-ggplot(MSE.est,aes(CELL,MSE,color=LAB))+
 MSE.ggplot
 # SUbplot for each cell number
 MSE.ggplot<-ggplot(MSE.est,aes(LAB,MSE,color=Treatment))+
-  geom_point()+
+  geom_point(size=1)+
   geom_line()+
-  facet_wrap(~CELL)
+  facet_wrap(.~CELL,nrow=1,ncol=6,labeller = label_both)
+
 MSE.ggplot<-MSE.ggplot+labs(color='Treatment',  y='MSE',x="Number of studies",
                             title=paste('Mean squared error of treatment effects ', '(',var.y,')', sep=''),
                             subtitle='Experimental design: 1-6 cell lines + 1-10 studies')+
@@ -271,7 +263,6 @@ MSE.ggplot
 ggsave(MSE.ggplot, file=paste(outputFilePath, var.y,'_MSE_CELL_LAB.png',sep=''),
        width = 10, height=8, dpi=300,bg = 'white')
 ## 2-D plot of Power
-# Sublots for different cells
 Power.ggplot<-ggplot(MSE.est,aes(LAB,Power,color=Treatment))+
   geom_point()+
   geom_line()+
@@ -339,4 +330,3 @@ Power.plotly<-Power.plotly %>% plotly::layout(title='Average Power over all trea
 Power.plotly
 save.image(file=paste(outputFilePath,var.y,'_ExpDesign.RData',sep = ''))
 load(paste(outputFilePath,var.y,'_ExpDesign.RData',sep = ''))
-by(MSE.est$MSE,MSE.est$Treatment,min)

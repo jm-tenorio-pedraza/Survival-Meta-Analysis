@@ -1,14 +1,15 @@
 (rm(list=ls()))
 set.seed(123)
+setwd('/')
+outputFilePath<-paste(getwd(),'/output',sep='')
+
 # Clinical workflow
 library(ggplot2)
 library(metafor)
 library(plyr)
 library(openxlsx)
-meta.df<-read.csv('~/Documents/GitHub/Survival-Meta-Analysis/output/clinical.red.df.csv',sep=',')
-meta.df2<-read.csv("~/Documents/GitHub/Survival-Meta-Analysis/output/clinical.df.csv")
-source('~/Documents/GitHub/Survival-Meta-Analysis/functions/DataProcessingFunctions.R')
-outputFilePath<-'~/Documents/Thesis/Results/'
+meta.df<-read.csv(paste(outputFilePath,'/clinical.red.df.csv',sep=''))
+source('functions/DataProcessingFunctions.R')
 # Unique treatment
 treatments<-unique(meta.df$Treatments)
 # Change the treatments to a factor

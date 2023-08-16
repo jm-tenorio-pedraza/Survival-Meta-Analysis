@@ -6,10 +6,11 @@ library(metafor)
 library(ggplot2)
 library(latex2exp)
 library(openxlsx)
-outputFilePath<-'~/Documents/Thesis/Results/'
+setwd('/') # set working directory
+outputFilePath<-paste(getwd(),'output',sep='')
 # Load models based on which vars to study:
-clin.var<-'OS_HR'
-pre.var<-'MR'
+clin.var<-'PFS_HR' #Determine which clinical efficacy measure to study
+pre.var<-'MR' # Determine which preclinical efficacy measure will be used as predictor
 if(clin.var=='OS_HR'){
   load(file=paste(outputFilePath,'OS_HR_clinical.m0.RData',sep = ''))
   load(file=paste(outputFilePath,'OS_HR_clinical.m1.RData',sep = ''))
@@ -210,12 +211,14 @@ predtrans.df$y.hat.UB<-y.hat$fit+y.hat$se.fit
   scale_x_continuous(limits=c(0,1.5))+
   scale_y_continuous(limits=c(0,2.0))+
   labs(color='Treatment',y='Clinical treatment effects (95% CI)',x="Preclinical treatment effects",
-       title='Translatability potential of preclinical efficacy into clinical improvements in survival',
+       title='Translatability potential of preclinical into clinical efficacy',
        subtitle=paste('Preclinical (', pre.var, ') vs clinical (',clin.var,') treatment effects',sep=''))+
   theme_minimal()+
   scale_color_discrete()+
-  theme(plot.title=element_text(size=16,face="bold",family="Helvetica"),
-        axis.title=element_text(size=12,face="bold",family="Helvetica")))
+  theme(plot.title=element_text(size=18,face="bold",family="Helvetica"),
+        axis.title=element_text(size=16,face="bold",family="Helvetica"),
+        legend.title = element_text(size=15),
+        legend.text = element_text(size=14)))
 
 ggsave(trans.plot, file=paste(outputFilePath,'Preclinical_', pre.var, '_vs_Clinical_', clin.var,'.png',sep=''),
        width = 10, height=8, dpi=300,bg='white')
@@ -226,15 +229,3 @@ write.xlsx(trans.m0.df,file=paste(outputFilePath,'Clinical_',clin.var,'_Preclini
 
 with(trans.m0.df,mean(abs((Preclinical.Est-Clinical.Est)/Clinical.Est)))
 with(trans.m0.df,((crossprod(Preclinical.Est-Clinical.Est)/dim(trans.m0.df)[1])))
-
-# For MR to PFS_HR: 15.01%
-# For HR to PFS_HR: 66.58%
-# For MR to OS_HR: 8.78%
-# For HR to OS_HR: 67.14%
-
-# Overall HRs were really bad at predicting individual studies HR estimates
-# MRs were better at approximating the overall treatment-specific PFS_HRs, but no significant association was found
-# MRs were better at predicting the individual studies of OS_HR than all other models,
-# however the overall treatment effect in the clinic was overestimated
-with(clinical.mat,plot(exp(HR),exp(PFS_HR)))
-abline(0,1)
